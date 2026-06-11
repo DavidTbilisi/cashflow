@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
-import type { GameState, PlayerState, Card, CardType, BoardSpace, NECSTAnswers, TurnEvent, MarketEvent } from '../domain/entities/types'
+import type { GameState, PlayerState, Card, CardType, BoardSpace, NECSTAnswers, TurnEvent, MarketEvent, PlayerHistoryPoint, TurnLogEntry } from '../domain/entities/types'
 import { ALL_BOARD_SPACES } from '../domain/data/boardSpaces'
 import { DREAMS, FAST_TRACK_BUSINESSES } from '../domain/data/fastTrack'
 import { buildDecks, drawCard } from '../domain/services/cardService'
@@ -40,6 +40,8 @@ interface GameStore {
   takeLoan: (amount: number) => void
   payOffDebt: (liabilityId: string, units?: number) => void
   moveToFastTrack: () => void
+  /** Borrow the shortfall and purchase a deal card atomically — logged as one event. */
+  borrowAndBuy: (card: Card) => void
   resetGame: () => void
 }
 
@@ -80,6 +82,26 @@ function makePlayer(
 
 function fresh(state: GameState): GameState {
   return { ...state, updatedAt: new Date().toISOString() }
+}
+
+const LOG_CAP = 200
+const HISTORY_CAP = 300
+
+function appendLog(state: GameState, entry: TurnLogEntry): GameState {
+  const log = [...state.turnLog, entry]
+  return { ...state, turnLog: log.length > LOG_CAP ? log.slice(-LOG_CAP) : log }
+}
+
+function appendHistory(state: GameState, playerId: string, point: PlayerHistoryPoint): GameState {
+  const existing = state.history[playerId] ?? []
+  const updated = [...existing, point]
+  return {
+    ...state,
+    history: {
+      ...state.history,
+      [playerId]: updated.length > HISTORY_CAP ? updated.slice(-HISTORY_CAP) : updated,
+    },
+  }
 }
 
 function setPlayer(state: GameState, idx: number, player: PlayerState): GameState {
@@ -147,6 +169,11 @@ function routeLanding(state: GameState, space: BoardSpace): GameState {
     const { card, deck } = drawCard(state.drawDecks[type] ?? [], state.discardPiles[type] ?? [])
     return { card, decks: { ...state.drawDecks, [type]: deck } }
   }
+  const addToDiscard = (s: GameState, card: Card): GameState => {
+    if (card.type === 'event') return s
+    const pile = s.discardPiles[card.type] ?? []
+    return { ...s, discardPiles: { ...s.discardPiles, [card.type]: [...pile, card] } }
+  }
 
   switch (space.type) {
     case 'payday':
@@ -161,11 +188,13 @@ function routeLanding(state: GameState, space: BoardSpace): GameState {
 
     case 'doodad': {
       const { card, decks } = drawFrom('doodad')
+      if (!card) return endCheck({ ...state, drawDecks: decks })
       return { ...state, activeCard: card, currentTurnPhase: 'action', drawDecks: decks }
     }
 
     case 'market': {
       const { card, decks } = drawFrom('market')
+      if (!card) return endCheck({ ...state, drawDecks: decks })
       const next = { ...state, drawDecks: decks }
       if (card.marketEvent) {
         const offer = matchingSellable(player, card.marketEvent)
@@ -179,6 +208,7 @@ function routeLanding(state: GameState, space: BoardSpace): GameState {
     case 'card_draw': {
       const type = space.cardDeckFilter?.[0] ?? 'decision_temptation'
       const { card, decks } = drawFrom(type)
+      if (!card) return endCheck({ ...state, drawDecks: decks })
       return { ...state, activeCard: card, currentTurnPhase: 'action', drawDecks: decks }
     }
 
@@ -296,6 +326,8 @@ export const useGameStore = create<GameStore>()(
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         rngSeed: seed,
+        history: {},
+        turnLog: [],
       }
       set({ game })
     },
@@ -309,7 +341,16 @@ export const useGameStore = create<GameStore>()(
       if (event.type === 'ROLL_DICE' && game.currentTurnPhase === 'idle') {
         // Skip a turn (Downsized / Bankruptcy / lose-turn cards) without rolling.
         if (player.skipTurns > 0) {
-          const skipped = setPlayer(game, idx, { ...player, skipTurns: player.skipTurns - 1 })
+          let skipped = setPlayer(game, idx, { ...player, skipTurns: player.skipTurns - 1 })
+          skipped = appendLog(skipped, {
+            id: `log_${game.turn}_skip`,
+            turn: game.turn,
+            round: game.round,
+            playerId: player.id,
+            playerName: player.name,
+            kind: 'note',
+            text: `${player.name} skipped their turn (${player.skipTurns - 1} remaining)`,
+          })
           const next = (idx + 1) % skipped.players.length
           set({ game: fresh({ ...skipped, currentPlayerIndex: next, round: next === 0 ? skipped.round + 1 : skipped.round, turn: skipped.turn + 1, currentTurnPhase: 'idle', lastDiceRoll: null }) })
           return
@@ -320,9 +361,28 @@ export const useGameStore = create<GameStore>()(
       }
 
       if (event.type === 'MOVE_COMPLETE' && game.currentTurnPhase === 'rolling') {
+        const cashBefore = player.finances.cashBalance
+        const fromPos = player.boardPosition
         const { player: moved, landed } = applyMovement(game, idx)
+        const cashDelta = moved.finances.cashBalance - cashBefore
+        const roll = diceTotal(game.lastDiceRoll ?? [0])
         const afterMove = setPlayer(game, idx, moved)
-        set({ game: fresh(routeLanding(afterMove, landed)) })
+        let next = routeLanding(afterMove, landed)
+        next = appendLog(next, {
+          id: `log_${game.turn}_land`,
+          turn: game.turn,
+          round: game.round,
+          playerId: player.id,
+          playerName: player.name,
+          kind: 'landing',
+          spaceId: landed.id,
+          fromPos,
+          toPos: moved.boardPosition,
+          roll,
+          cashDelta,
+          text: `${player.name} rolled ${roll} → ${landed.label} (pos ${moved.boardPosition})${cashDelta !== 0 ? ` · ${cashDelta > 0 ? '+' : ''}${formatCurrency(cashDelta)}` : ''}`,
+        })
+        set({ game: fresh(next) })
         return
       }
 
@@ -341,6 +401,18 @@ export const useGameStore = create<GameStore>()(
           acted = { ...acted, extraDiceTurns: acted.extraDiceTurns - 1 }
         }
         state = setPlayer(state, idx, acted)
+
+        const snap = computeSummary(acted.finances)
+        const histPoint: PlayerHistoryPoint = {
+          turn: state.turn,
+          netWorth: snap.netWorth,
+          passiveIncome: snap.totalPassiveIncome,
+          totalIncome: snap.totalMonthlyIncome,
+          totalExpenses: snap.totalMonthlyExpenses,
+          cashFlow: snap.monthlyCashFlow,
+          cashBalance: acted.finances.cashBalance,
+        }
+        state = appendHistory(state, acted.id, histPoint)
 
         const result = evaluateWinConditions(state)
         if (result.status === 'win') {
@@ -384,6 +456,11 @@ export const useGameStore = create<GameStore>()(
       const idx = game.currentPlayerIndex
       let state = { ...game }
 
+      if (card.type !== 'event') {
+        const pile = state.discardPiles[card.type] ?? []
+        state = { ...state, discardPiles: { ...state.discardPiles, [card.type]: [...pile, card] } }
+      }
+
       if (accepted) {
         let player = state.players[idx]
         for (const effect of card.effects) {
@@ -400,6 +477,9 @@ export const useGameStore = create<GameStore>()(
       if (!game || !game.activeCard) return
       const idx = game.currentPlayerIndex
       const card = game.activeCard
+      const discardedPiles = card.type !== 'event'
+        ? { ...game.discardPiles, [card.type]: [...(game.discardPiles[card.type] ?? []), card] }
+        : game.discardPiles
       const threshold = card.necstPassThreshold ?? 3
       const { passed } = scoreNECST(answers, threshold)
 
@@ -411,7 +491,7 @@ export const useGameStore = create<GameStore>()(
           }
         }
       }
-      set({ game: fresh({ ...endCheck(setPlayer(game, idx, player)), activeNECSTAnswers: answers }) })
+      set({ game: fresh({ ...endCheck(setPlayer({ ...game, discardPiles: discardedPiles }, idx, player)), activeNECSTAnswers: answers }) })
     },
 
     chooseDeal: (size) => {
@@ -419,6 +499,10 @@ export const useGameStore = create<GameStore>()(
       if (!game || game.currentTurnPhase !== 'choose_deal') return
       const type: CardType = size === 'small' ? 'small_deal' : 'big_deal'
       const { card, deck } = drawCard(game.drawDecks[type] ?? [], game.discardPiles[type] ?? [])
+      if (!card) {
+        set({ game: fresh(endCheck({ ...game, drawDecks: { ...game.drawDecks, [type]: deck } })) })
+        return
+      }
       set({ game: fresh({ ...game, activeCard: card, currentTurnPhase: 'action', drawDecks: { ...game.drawDecks, [type]: deck } }) })
     },
 
@@ -449,14 +533,26 @@ export const useGameStore = create<GameStore>()(
       const idx = game.currentPlayerIndex
       const offer = game.marketOffer.find((o) => o.assetId === assetId)
       if (!offer) return
-      const updated = sellAsset(game.players[idx], assetId, offer.salePrice)
-      set({ game: fresh(endCheck(setPlayer(game, idx, updated))) })
+      const card = game.activeCard
+      let state = game
+      if (card && card.type !== 'event') {
+        const pile = state.discardPiles[card.type] ?? []
+        state = { ...state, discardPiles: { ...state.discardPiles, [card.type]: [...pile, card] } }
+      }
+      const updated = sellAsset(state.players[idx], assetId, offer.salePrice)
+      set({ game: fresh(endCheck(setPlayer(state, idx, updated))) })
     },
 
     passMarket: () => {
       const { game } = get()
       if (!game) return
-      set({ game: fresh(endCheck(game)) })
+      const card = game.activeCard
+      let state = game
+      if (card && card.type !== 'event') {
+        const pile = state.discardPiles[card.type] ?? []
+        state = { ...state, discardPiles: { ...state.discardPiles, [card.type]: [...pile, card] } }
+      }
+      set({ game: fresh(endCheck(state)) })
     },
 
     buyPending: () => {
@@ -512,6 +608,43 @@ export const useGameStore = create<GameStore>()(
       const idx = game.currentPlayerIndex
       if (!canEnterFastTrack(game.players[idx])) return
       set({ game: fresh(setPlayer(game, idx, enterFastTrack(game, idx))) })
+    },
+
+    borrowAndBuy: (card) => {
+      const { game } = get()
+      if (!game || !game.activeCard) return
+      const idx = game.currentPlayerIndex
+      const player = game.players[idx]
+      const dealEffect = card.effects.find((e) => e.type === 'acquire_asset')
+      if (!dealEffect || dealEffect.type !== 'acquire_asset') return
+      const downPayment = dealEffect.asset.purchasePrice - dealEffect.asset.liabilityAmount
+      const shortfall = downPayment - player.finances.cashBalance
+      if (shortfall <= 0) return
+      const borrowAmount = Math.ceil(shortfall / 1000) * 1000
+
+      let state = { ...game }
+      if (card.type !== 'event') {
+        const pile = state.discardPiles[card.type] ?? []
+        state = { ...state, discardPiles: { ...state.discardPiles, [card.type]: [...pile, card] } }
+      }
+
+      let updated = takeBankLoan(player, borrowAmount)
+      for (const effect of card.effects) {
+        if (effect.type === 'necst_gate') continue
+        updated = applyCardEffect(updated, effect, state.turn)
+      }
+      state = setPlayer(state, idx, updated)
+      state = appendLog(state, {
+        id: `log_${game.turn}_borrow_buy`,
+        turn: game.turn,
+        round: game.round,
+        playerId: player.id,
+        playerName: player.name,
+        kind: 'purchase',
+        cashDelta: -(downPayment),
+        text: `T${game.turn} ${player.name} borrowed ${formatCurrency(borrowAmount)} and bought ${card.title}`,
+      })
+      set({ game: fresh(endCheck(state)) })
     },
 
     resetGame: () => set({ game: null }),

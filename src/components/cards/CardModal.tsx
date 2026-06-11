@@ -2,6 +2,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import type { Card } from '../../domain/entities/types'
 import { useGameStore } from '../../store/gameStore'
 import { useUIStore } from '../../store/uiStore'
+import { computeSummary } from '../../domain/services/financialCalc'
+import { formatCurrency } from '../../utils/currency'
+import { valueColor } from '../../utils/colors'
 
 const TYPE_META: Record<string, { color: string; label: string }> = {
   small_deal:          { color: '#5B8FF9', label: 'Small Deal' },
@@ -23,7 +26,9 @@ interface Props { card: Card }
 
 export function CardModal({ card }: Props) {
   const resolveCard = useGameStore((s) => s.resolveCard)
-  const cash = useGameStore((s) => (s.game ? s.game.players[s.game.currentPlayerIndex].finances.cashBalance : 0))
+  const borrowAndBuy = useGameStore((s) => s.borrowAndBuy)
+  const finances = useGameStore((s) => s.game ? s.game.players[s.game.currentPlayerIndex].finances : null)
+  const cash = finances?.cashBalance ?? 0
   const openModal = useUIStore((s) => s.openModal)
   const meta = TYPE_META[card.type] ?? { color: '#8090A8', label: card.type }
 
@@ -34,11 +39,29 @@ export function CardModal({ card }: Props) {
     : 0
   const unaffordable = downPayment > 0 && cash < downPayment
 
+  // Borrow-and-buy amounts (only relevant when unaffordable)
+  const borrowAmount = unaffordable ? Math.ceil((downPayment - cash) / 1000) * 1000 : 0
+  const assetIncome = (dealEffect && dealEffect.type === 'acquire_asset') ? dealEffect.asset.monthlyPassiveIncome : 0
+  const assetMaintenance = (dealEffect && dealEffect.type === 'acquire_asset') ? dealEffect.asset.monthlyExpense : 0
+  const loanPayment = Math.round(borrowAmount * 0.1)
+  const netCF = assetIncome - assetMaintenance - loanPayment
+
+  // Warn if combined monthly expenses exceed total income after the transaction
+  const summary = finances ? computeSummary(finances) : null
+  const postBorrowCashFlow = summary ? summary.monthlyCashFlow + netCF : netCF
+  const cashFlowWarning = unaffordable && postBorrowCashFlow < 0
+
+  // Remaining cash after purchase (affordable path)
+  const remainingCash = cash - downPayment
+  const monthlyExpenses = summary?.totalMonthlyExpenses ?? 0
+  const remainingCashColor = remainingCash < monthlyExpenses ? 'var(--color-flame)' : 'var(--color-seafoam)'
+
   const handleAccept = () => {
     if (unaffordable) return
     if (card.requiresNECST) { openModal('necst'); return }
     resolveCard(card, true)
   }
+  const handleBorrowAndBuy = () => borrowAndBuy(card)
   const handleDecline = () => resolveCard(card, false)
   const canDecline = DECLINABLE.has(card.type)
 
@@ -118,11 +141,46 @@ export function CardModal({ card }: Props) {
             )}
 
             {downPayment > 0 && (
-              <div className="flex justify-between text-xs mb-3" style={{ fontFamily: 'var(--font-data)' }}>
-                <span style={{ color: 'var(--color-fog)' }}>Down payment</span>
-                <span style={{ color: unaffordable ? 'var(--color-flame)' : 'var(--color-snow)' }}>
-                  {dealEffect && dealEffect.type === 'acquire_asset' && `−$${downPayment.toLocaleString()} · cash $${cash.toLocaleString()}`}
-                </span>
+              <div className="mb-3 text-xs" style={{ fontFamily: 'var(--font-data)' }}>
+                <div className="flex justify-between">
+                  <span style={{ color: 'var(--color-fog)' }}>Down payment</span>
+                  <span style={{ color: 'var(--color-flame)' }}>
+                    −{formatCurrency(downPayment)}
+                  </span>
+                </div>
+                {!unaffordable && (
+                  <div className="flex justify-between mt-0.5">
+                    <span style={{ color: 'var(--color-fog)' }}>Remaining cash</span>
+                    <span style={{ color: remainingCashColor }}>{formatCurrency(remainingCash)}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {unaffordable && (
+              <div
+                className="mb-3 px-3 py-2 text-[11px] leading-relaxed"
+                style={{ background: 'rgba(91,143,249,0.08)', border: '1px solid rgba(91,143,249,0.22)', borderRadius: '3px', fontFamily: 'var(--font-data)' }}
+              >
+                <div className="flex justify-between mb-0.5">
+                  <span style={{ color: 'var(--color-fog)' }}>
+                    {assetIncome > 0 ? `+${formatCurrency(assetIncome)}/mo income` : 'No income'}
+                  </span>
+                  {assetMaintenance > 0 && (
+                    <span style={{ color: 'var(--color-fog)' }}>−{formatCurrency(assetMaintenance)}/mo maint.</span>
+                  )}
+                </div>
+                <div className="flex justify-between mb-0.5">
+                  <span style={{ color: 'var(--color-fog)' }}>−{formatCurrency(loanPayment)}/mo loan</span>
+                  <span style={{ color: valueColor(netCF), fontWeight: 600 }}>
+                    {netCF >= 0 ? '+' : ''}{formatCurrency(netCF)}/mo net
+                  </span>
+                </div>
+                {cashFlowWarning && (
+                  <p className="mt-1 text-[10px]" style={{ color: 'var(--color-honey)' }}>
+                    ⚠ Monthly expenses will exceed income — cash flow goes negative.
+                  </p>
+                )}
               </div>
             )}
 
@@ -144,20 +202,35 @@ export function CardModal({ card }: Props) {
                   Pass
                 </button>
               )}
-              <button
-                onClick={handleAccept}
-                disabled={unaffordable}
-                className="flex-1 py-2.5 text-sm font-semibold transition-opacity hover:opacity-90"
-                style={{
-                  background: unaffordable ? 'var(--color-rim)' : meta.color,
-                  color: unaffordable ? 'var(--color-fog)' : 'var(--color-ink)',
-                  borderRadius: '3px',
-                  border: 'none',
-                  cursor: unaffordable ? 'not-allowed' : 'pointer',
-                }}
-              >
-                {unaffordable ? 'Not enough cash' : canDecline ? 'Accept' : 'Continue'}
-              </button>
+              {unaffordable ? (
+                <button
+                  onClick={handleBorrowAndBuy}
+                  className="flex-1 py-2.5 text-sm font-semibold transition-opacity hover:opacity-90"
+                  style={{
+                    background: '#5B8FF9',
+                    color: 'var(--color-ink)',
+                    borderRadius: '3px',
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Borrow {formatCurrency(borrowAmount)} & Buy
+                </button>
+              ) : (
+                <button
+                  onClick={handleAccept}
+                  className="flex-1 py-2.5 text-sm font-semibold transition-opacity hover:opacity-90"
+                  style={{
+                    background: meta.color,
+                    color: 'var(--color-ink)',
+                    borderRadius: '3px',
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {canDecline ? 'Accept' : 'Continue'}
+                </button>
+              )}
             </div>
           </div>
         </motion.div>

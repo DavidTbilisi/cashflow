@@ -1,0 +1,79 @@
+import type { Card } from '../../entities/types'
+
+// The Market: buyers for your investments (sell a matching asset at the listed
+// price) plus a few economic events. A card with `marketEvent` is a sell offer
+// that only matters if you own the named asset / asset class; otherwise it's an
+// event applied via `effects`.
+export const marketCards: Card[] = [
+  {
+    id: 'mkt_house_buyer',
+    type: 'market',
+    title: 'Buyer for a 3Br/2Ba House',
+    description: 'A family relocating to town offers $65,000 for a 3Br/2Ba house. Sell if you own one.',
+    marketEvent: { assetName: '3Br/2Ba House', salePrice: 65000 },
+    effects: [],
+    lesson: 'A buyer at the right price is a chance to realize a capital gain — or hold for cash flow.',
+  },
+  {
+    id: 'mkt_condo_buyer',
+    type: 'market',
+    title: 'Condo Buyer',
+    description: 'An investor offers $55,000 for a rental condo.',
+    marketEvent: { assetName: 'Rental Condo', salePrice: 55000 },
+    effects: [],
+    lesson: 'You bought below value; selling above it locks in the spread.',
+  },
+  {
+    id: 'mkt_apartment_buyer',
+    type: 'market',
+    title: 'Apartment House Buyer',
+    description: 'A syndicate offers $480,000 for a 12-unit apartment building.',
+    marketEvent: { assetName: '12-Unit Apartments', salePrice: 480000 },
+    effects: [],
+    lesson: 'Big buyers chase cash-flowing buildings — a strong exit if the price is right.',
+  },
+  {
+    id: 'mkt_8plex_buyer',
+    type: 'market',
+    title: '8-Plex Buyer',
+    description: 'A local landlord offers $320,000 for an 8-plex.',
+    marketEvent: { assetName: '8-Plex', salePrice: 320000 },
+    effects: [],
+    lesson: 'Every asset has a price. Know yours before the offer arrives.',
+  },
+  {
+    id: 'mkt_business_buyer',
+    type: 'market',
+    title: 'Business Buyer',
+    description: 'A competitor wants to roll up small businesses and offers a 1.5× multiple. Sell a business if you own one.',
+    marketEvent: { assetClass: 'business', salePrice: 180000 },
+    effects: [],
+    lesson: 'Businesses sell on a multiple of their earnings — build cash flow, build value.',
+  },
+  {
+    id: 'mkt_ok4u_high',
+    type: 'market',
+    title: 'OK4U Hits $30',
+    description: 'OK4U Drug Co. spikes to the top of its range. Your shares are now worth $7,500. Sell?',
+    marketEvent: { assetName: 'OK4U', salePrice: 7500 },
+    effects: [],
+    lesson: 'Sell into strength. A stock with no dividend only pays when you take the gain.',
+  },
+  {
+    id: 'mkt_land_boom',
+    type: 'market',
+    title: 'Developer Wants Your Land',
+    description: 'A developer offers $15,000 for 5 acres on the edge of town.',
+    marketEvent: { assetName: '5 Acres', salePrice: 15000 },
+    effects: [],
+    lesson: 'Land in the path of growth pays off — to the patient owner who waited.',
+  },
+  {
+    id: 'mkt_interest_up',
+    type: 'market',
+    title: 'Interest Rates Rise',
+    description: 'The central bank hikes rates. Variable costs tick up $100/mo this round.',
+    effects: [{ type: 'add_expense', monthlyAmount: 100, label: 'Higher interest', isFixed: false }],
+    lesson: 'Rising rates raise the cost of debt — another reason to keep leverage sensible.',
+  },
+]

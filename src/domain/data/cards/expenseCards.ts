@@ -1,0 +1,71 @@
+import type { Card } from '../../entities/types'
+
+export const expenseCards: Card[] = [
+  {
+    id: 'exp_01',
+    type: 'expense_liability',
+    title: 'Car Upgrade',
+    description: 'You finance a new car: $400/month payment for 5 years.',
+    effects: [{ type: 'add_expense', monthlyAmount: 400, label: 'Car payment', isFixed: true }],
+    lesson: 'A car is a liability. It depreciates and takes money out every month.',
+  },
+  {
+    id: 'exp_02',
+    type: 'expense_liability',
+    title: 'Medical Emergency',
+    description: 'Unexpected medical bill: $3,000 out of pocket.',
+    effects: [{ type: 'cash_loss', amount: 3000 }],
+    lesson: 'This is why the Safe anchor (6-month buffer) must be funded before you invest.',
+  },
+  {
+    id: 'exp_03',
+    type: 'expense_liability',
+    title: 'Lifestyle Inflation',
+    description: 'After your raise you moved to a bigger apartment: +$600/month rent.',
+    effects: [{ type: 'add_expense', monthlyAmount: 600, label: 'Lifestyle rent increase', isFixed: true }],
+    lesson: 'Lifestyle inflation is the Rat Race accelerant. Every dollar here is an asset never bought.',
+  },
+  {
+    id: 'exp_04',
+    type: 'expense_liability',
+    title: 'Tax Bill',
+    description: 'Tax season hits. E-quadrant pays a higher effective rate — $2,500.',
+    effects: [{ type: 'cash_loss', amount: 2500 }],
+    lesson: 'Employees pay tax before spending. Businesses spend before being taxed.',
+  },
+  {
+    id: 'exp_05',
+    type: 'expense_liability',
+    title: 'Home Repair',
+    description: 'Your roof needs replacing: $4,500.',
+    effects: [{ type: 'cash_loss', amount: 4500 }],
+    lesson: 'Assets require maintenance. Budget for it or emergencies drain cash.',
+  },
+  {
+    id: 'exp_06',
+    type: 'expense_liability',
+    title: 'Credit Card Debt',
+    description: 'High-interest credit debt: $200/month minimum payment added.',
+    effects: [
+      { type: 'add_expense', monthlyAmount: 200, label: 'Credit card payment', isFixed: true },
+      { type: 'add_liability', amount: 0, monthlyPayment: 200, label: 'Credit card debt' },
+    ],
+    lesson: 'Consumer debt at 20%+ APR is the most destructive liability on your sheet.',
+  },
+  {
+    id: 'exp_07',
+    type: 'expense_liability',
+    title: 'Subscription Creep',
+    description: "You realize you're paying $350/month in unused subscriptions.",
+    effects: [{ type: 'add_expense', monthlyAmount: 350, label: 'Subscription services', isFixed: false }],
+    lesson: 'Small recurring costs are invisible until you audit them. Audit monthly.',
+  },
+  {
+    id: 'exp_08',
+    type: 'expense_liability',
+    title: 'Job Loss',
+    description: 'Layoff. Your primary salary stops for 2 months — lose $1,500 this turn.',
+    effects: [{ type: 'cash_loss', amount: 1500 }],
+    lesson: "A single income source is fragile. Passive income doesn't stop when you lose a job.",
+  },
+]

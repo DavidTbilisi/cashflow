@@ -1,0 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #070A12;
+  --color-paper: #0C1420;
+  --color-card: #111B28;
+  --color-rim: #1B2A3A;
+  --color-wire: #243547;
+  --color-fog: #4D6275;
+  --color-mist: #8090A8;
+  --color-snow: #E2EAF4;
+  --color-seafoam: #2DD4BF;
+  --color-flame: #F06070;
+  --color-azure: #5B8FF9;
+  --color-gold: #C8963C;
+  --color-honey: #F0A050;
+  --color-iris: #A87BF0;
+  --font-display: 'Cormorant', Georgia, serif;
+  --font-ui: 'Sora', system-ui, sans-serif;
+  --font-data: 'JetBrains Mono', 'Courier New', monospace;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--color-ink);
+  color: var(--color-snow);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

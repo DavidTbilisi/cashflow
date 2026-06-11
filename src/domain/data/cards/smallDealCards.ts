@@ -1,0 +1,74 @@
+import type { Card } from '../../entities/types'
+
+// Small Deals: stocks & small real estate. Down payment / cost ≤ $5,000 to get in.
+// (Cost on the asset = purchasePrice − liabilityAmount = the cash you actually pay.)
+export const smallDealCards: Card[] = [
+  {
+    id: 'sd_ok4u',
+    type: 'small_deal',
+    title: 'Stock — OK4U Drug Co.',
+    description: 'Market strength lifts this long-time medicine maker. Buy in at $5,000 (today $20/share).',
+    flavorText: 'Trading range $5–$30. No dividend (ROI 0%) — a bet on price.',
+    effects: [{ type: 'acquire_asset', asset: { name: 'OK4U', assetClass: 'stocks', purchasePrice: 5000, currentValue: 5000, monthlyPassiveIncome: 0, monthlyExpense: 0, leverageUsed: false, liabilityAmount: 0, cardId: 'sd_ok4u' } }],
+    lesson: 'A stock with no dividend pays only if you sell higher than you bought — speculation, not cash flow.',
+  },
+  {
+    id: 'sd_2big',
+    type: 'small_deal',
+    title: 'Stock — 2BIG Power Co.',
+    description: 'Steady utility paying a dividend. Buy $4,000 of shares at $13.',
+    flavorText: 'Trading range $10–$40. Pays a small monthly dividend.',
+    effects: [{ type: 'acquire_asset', asset: { name: '2BIG', assetClass: 'stocks', purchasePrice: 4000, currentValue: 4000, monthlyPassiveIncome: 40, monthlyExpense: 0, leverageUsed: false, liabilityAmount: 0, cardId: 'sd_2big' } }],
+    lesson: 'Dividend stocks pay you to wait — cash flow plus the chance of appreciation.',
+  },
+  {
+    id: 'sd_house_3_2',
+    type: 'small_deal',
+    title: '3Br/2Ba House for Rent',
+    description: 'Motivated seller. Price $50,000, your down payment $5,000. Nets +$140/mo after the mortgage.',
+    effects: [{ type: 'acquire_asset', asset: { name: '3Br/2Ba House', assetClass: 'real_estate', purchasePrice: 50000, currentValue: 50000, monthlyPassiveIncome: 140, monthlyExpense: 0, leverageUsed: true, liabilityAmount: 45000, cardId: 'sd_house_3_2' } }],
+    lesson: 'A small down payment controls a whole property — leverage working for you.',
+  },
+  {
+    id: 'sd_condo',
+    type: 'small_deal',
+    title: 'Condo for Rent',
+    description: 'Foreclosed condo. Price $40,000, down payment $4,000, mortgage $36,000. Nets +$120/mo.',
+    effects: [{ type: 'acquire_asset', asset: { name: 'Rental Condo', assetClass: 'real_estate', purchasePrice: 40000, currentValue: 40000, monthlyPassiveIncome: 120, monthlyExpense: 0, leverageUsed: true, liabilityAmount: 36000, cardId: 'sd_condo' } }],
+    lesson: 'Foreclosures can be bought below value — but always run the cash-flow numbers first.',
+  },
+  {
+    id: 'sd_partnership',
+    type: 'small_deal',
+    title: 'Limited Partnership',
+    description: 'A friend offers a $3,000 stake in a local laundromat. Pays +$75/mo.',
+    effects: [{ type: 'acquire_asset', asset: { name: 'Laundromat LP', assetClass: 'business', purchasePrice: 3000, currentValue: 3000, monthlyPassiveIncome: 75, monthlyExpense: 0, leverageUsed: false, liabilityAmount: 0, cardId: 'sd_partnership' } }],
+    lesson: 'A limited partnership lets you own a slice of a business without running it.',
+  },
+  {
+    id: 'sd_cd',
+    type: 'small_deal',
+    title: 'Certificate of Deposit',
+    description: 'Park $5,000 in a 12-month CD. Pays +$25/mo in interest.',
+    effects: [{ type: 'acquire_asset', asset: { name: 'CD', assetClass: 'bonds', purchasePrice: 5000, currentValue: 5000, monthlyPassiveIncome: 25, monthlyExpense: 0, leverageUsed: false, liabilityAmount: 0, cardId: 'sd_cd' } }],
+    lesson: 'Safe, liquid, low return — fine for cash you can\'t risk, weak for building wealth.',
+  },
+  {
+    id: 'sd_land',
+    type: 'small_deal',
+    title: 'Raw Land — 5 Acres',
+    description: 'Five acres on the edge of a growing town for $5,000. No income — pure appreciation play.',
+    flavorText: 'Sell later through The Market if values rise.',
+    effects: [{ type: 'acquire_asset', asset: { name: '5 Acres', assetClass: 'real_estate', purchasePrice: 5000, currentValue: 5000, monthlyPassiveIncome: 0, monthlyExpense: 0, leverageUsed: false, liabilityAmount: 0, cardId: 'sd_land' } }],
+    lesson: 'Land in the path of growth can multiply — but it eats cash while you wait.',
+  },
+  {
+    id: 'sd_coins',
+    type: 'small_deal',
+    title: 'Rare Coin Collection',
+    description: 'A retiring collector sells a set of rare coins for $1,500.',
+    flavorText: 'Collectibles pay nothing monthly — you profit only on resale.',
+    effects: [{ type: 'acquire_asset', asset: { name: 'Rare Coins', assetClass: 'commodity', purchasePrice: 1500, currentValue: 1500, monthlyPassiveIncome: 0, monthlyExpense: 0, leverageUsed: false, liabilityAmount: 0, cardId: 'sd_coins' } }],
+    lesson: 'Collectibles are speculation: no cash flow, and a market only when someone wants them.',
+  },
+]

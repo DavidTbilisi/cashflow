@@ -1,0 +1,86 @@
+import type { Card } from '../../entities/types'
+
+// Doodads: the unexpected and often unnecessary things you spend money on.
+// Mandatory, one-off cash expenses (rulebook page 3). Borrow from the Bank if short.
+export const doodadCards: Card[] = [
+  {
+    id: 'dd_phone',
+    type: 'doodad',
+    title: 'New Smartphone',
+    description: 'The latest model is out and yours "suddenly" feels old. Pay $500.',
+    effects: [{ type: 'cash_loss', amount: 500 }],
+    lesson: 'Doodads feel like needs in the moment. They are wants that drain your cash.',
+  },
+  {
+    id: 'dd_tv',
+    type: 'doodad',
+    title: 'Big-Screen TV',
+    description: 'A "can\'t-miss" sale on a giant TV. Pay $1,200.',
+    effects: [{ type: 'cash_loss', amount: 1200 }],
+    lesson: 'A sale on something you didn\'t need is still money out of your pocket.',
+  },
+  {
+    id: 'dd_vacation',
+    type: 'doodad',
+    title: 'Impulse Vacation',
+    description: 'A getaway you booked on a whim. Pay $2,000.',
+    effects: [{ type: 'cash_loss', amount: 2000 }],
+    lesson: 'There\'s nothing wrong with a vacation — if your assets paid for it.',
+  },
+  {
+    id: 'dd_car_repair',
+    type: 'doodad',
+    title: 'Car Repair',
+    description: 'The transmission goes out. Pay $1,500.',
+    effects: [{ type: 'cash_loss', amount: 1500 }],
+    lesson: 'Unexpected repairs are why the Safe anchor — a cash buffer — matters.',
+  },
+  {
+    id: 'dd_dentist',
+    type: 'doodad',
+    title: 'Dentist Bill',
+    description: 'A crown you didn\'t budget for. Pay $800.',
+    effects: [{ type: 'cash_loss', amount: 800 }],
+    lesson: 'Health costs are real and recurring — keep a cushion for them.',
+  },
+  {
+    id: 'dd_boat',
+    type: 'doodad',
+    title: 'Boat Down Payment',
+    description: '"A boat is a hole in the water you throw money into." Pay $3,000.',
+    effects: [{ type: 'cash_loss', amount: 3000 }],
+    lesson: 'Big toys are big liabilities — they take money out every month you own them.',
+  },
+  {
+    id: 'dd_clothes',
+    type: 'doodad',
+    title: 'Designer Wardrobe',
+    description: 'A shopping spree to "look the part." Pay $900.',
+    effects: [{ type: 'cash_loss', amount: 900 }],
+    lesson: 'Looking rich and being rich are opposites. One spends, the other invests.',
+  },
+  {
+    id: 'dd_gadgets',
+    type: 'doodad',
+    title: 'Gadget Splurge',
+    description: 'Headphones, a smartwatch, and a tablet you\'ll barely use. Pay $700.',
+    effects: [{ type: 'cash_loss', amount: 700 }],
+    lesson: 'Small splurges add up faster than almost anyone tracks.',
+  },
+  {
+    id: 'dd_pet',
+    type: 'doodad',
+    title: 'New Puppy',
+    description: 'Adorable — and pricey with vet bills and supplies. Pay $600.',
+    effects: [{ type: 'cash_loss', amount: 600 }],
+    lesson: 'Every commitment has a carrying cost. Count it before you take it on.',
+  },
+  {
+    id: 'dd_party',
+    type: 'doodad',
+    title: 'Big Birthday Party',
+    description: 'You went all out for the celebration. Pay $400.',
+    effects: [{ type: 'cash_loss', amount: 400 }],
+    lesson: 'Celebrate — but let your cash flow, not your credit card, foot the bill.',
+  },
+]

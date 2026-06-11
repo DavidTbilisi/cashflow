@@ -1,0 +1,68 @@
+import type { Card } from '../../entities/types'
+
+export const incomeCards: Card[] = [
+  {
+    id: 'inc_01',
+    type: 'income',
+    title: 'Salary Raise',
+    description: 'Your employer gives you a $500/month raise. But will you let lifestyle creep consume it?',
+    effects: [{ type: 'gain_income', monthlyAmount: 500, label: 'Salary raise', isPassive: false }],
+    lesson: 'A raise only helps if it goes to assets, not lifestyle inflation.',
+  },
+  {
+    id: 'inc_02',
+    type: 'income',
+    title: 'Freelance Project',
+    description: 'A client hires you for a side project worth $1,200/month.',
+    effects: [{ type: 'gain_income', monthlyAmount: 1200, label: 'Freelance income', isPassive: false }],
+    lesson: 'Freelance income is S-quadrant: it stops when you stop.',
+  },
+  {
+    id: 'inc_03',
+    type: 'income',
+    title: 'Dividend Payout',
+    description: 'Your index fund pays a quarterly dividend — $200/month equivalent.',
+    effects: [{ type: 'gain_income', monthlyAmount: 200, label: 'Dividend income', isPassive: true }],
+    lesson: 'Dividends are passive: capital works even while you sleep.',
+  },
+  {
+    id: 'inc_04',
+    type: 'income',
+    title: 'Online Course Launch',
+    description: 'Your course sells steadily — $600/month in passive royalties.',
+    effects: [{ type: 'gain_income', monthlyAmount: 600, label: 'Course royalties', isPassive: true }],
+    lesson: 'Intellectual property pays repeatedly for work done once.',
+  },
+  {
+    id: 'inc_05',
+    type: 'income',
+    title: 'Rental Income',
+    description: 'Tenant pays $1,800/month. After mortgage of $1,200, you net $600.',
+    effects: [{ type: 'gain_income', monthlyAmount: 600, label: 'Rental income', isPassive: true }],
+    lesson: 'Real estate cash flow is the difference between rent and total cost — not just the rent.',
+  },
+  {
+    id: 'inc_06',
+    type: 'income',
+    title: 'Consulting Retainer',
+    description: 'A company pays you $2,000/month on retainer for your expertise.',
+    effects: [{ type: 'gain_income', monthlyAmount: 2000, label: 'Consulting retainer', isPassive: false }],
+    lesson: 'Retainers are still S-quadrant unless you can systemize delivery.',
+  },
+  {
+    id: 'inc_07',
+    type: 'income',
+    title: 'Affiliate Revenue',
+    description: 'Your blog generates $300/month in affiliate commissions.',
+    effects: [{ type: 'gain_income', monthlyAmount: 300, label: 'Affiliate revenue', isPassive: true }],
+    lesson: 'Small passive streams add up — and they compound over time.',
+  },
+  {
+    id: 'inc_08',
+    type: 'income',
+    title: 'Bonus Check',
+    description: 'Year-end bonus of $5,000. One-time cash.',
+    effects: [{ type: 'cash_gain', amount: 5000 }],
+    lesson: 'Bonuses are windfalls. Deploy them into assets, not consumption.',
+  },
+]

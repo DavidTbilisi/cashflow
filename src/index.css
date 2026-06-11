@@ -1,23 +1,23 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --color-ink: #070A12;
-  --color-paper: #0C1420;
-  --color-card: #111B28;
-  --color-rim: #1B2A3A;
-  --color-wire: #243547;
-  --color-fog: #4D6275;
-  --color-mist: #8090A8;
-  --color-snow: #E2EAF4;
-  --color-seafoam: #2DD4BF;
-  --color-flame: #F06070;
-  --color-azure: #5B8FF9;
-  --color-gold: #C8963C;
-  --color-honey: #F0A050;
-  --color-iris: #A87BF0;
-  --font-display: 'Cormorant', Georgia, serif;
-  --font-ui: 'Sora', system-ui, sans-serif;
+  --color-ink: #0B0B0B;
+  --color-paper: #141414;
+  --color-card: #1A1A1A;
+  --color-rim: #2A2A2A;
+  --color-wire: #3A3A3A;
+  --color-fog: #6E6E6E;
+  --color-mist: #9A9A9A;
+  --color-snow: #E6E6E6;
+  --color-seafoam: #4ade80;
+  --color-flame: #f87171;
+  --color-azure: #4ade80;
+  --color-gold: #fbbf24;
+  --color-honey: #fbbf24;
+  --color-iris: #a78bfa;
+  --font-display: 'JetBrains Mono', 'Courier New', monospace;
+  --font-ui: 'JetBrains Mono', 'Courier New', monospace;
   --font-data: 'JetBrains Mono', 'Courier New', monospace;
 }
 

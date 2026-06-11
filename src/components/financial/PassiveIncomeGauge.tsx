@@ -1,6 +1,7 @@
 import type { PlayerState } from '../../domain/entities/types'
 import { computeSummary } from '../../domain/services/financialCalc'
 import { formatCurrency } from '../../utils/currency'
+import { gaugeColor } from '../../utils/colors'
 import { InfoLabel, TERM_INFO } from '../ui/conceptInfo'
 
 interface Props { player: PlayerState }
@@ -26,7 +27,7 @@ export function PassiveIncomeGauge({ player }: Props) {
         <span
           className="text-xs font-bold"
           style={{
-            color: free ? 'var(--color-seafoam)' : 'var(--color-honey)',
+            color: gaugeColor(pct),
             fontFamily: 'var(--font-data)',
           }}
         >
@@ -42,9 +43,7 @@ export function PassiveIncomeGauge({ player }: Props) {
           className="h-full transition-all duration-700"
           style={{
             width: `${pct}%`,
-            background: free
-              ? 'var(--color-seafoam)'
-              : `linear-gradient(90deg, var(--color-azure), var(--color-honey))`,
+            background: gaugeColor(pct),
             borderRadius: '2px',
           }}
         />
@@ -62,9 +61,9 @@ export function PassiveIncomeGauge({ player }: Props) {
         <div
           className="mt-1.5 text-center text-[11px] font-bold tracking-wider py-1"
           style={{
-            background: 'rgba(45,212,191,0.1)',
-            color: 'var(--color-seafoam)',
-            border: '1px solid rgba(45,212,191,0.25)',
+            background: 'var(--color-wire)',
+            color: 'var(--color-snow)',
+            border: '1px solid var(--color-mist)',
             borderRadius: '2px',
           }}
         >

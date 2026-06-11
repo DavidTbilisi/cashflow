@@ -2,9 +2,9 @@ import type { ReactNode } from 'react'
 import type { PlayerState } from '../../domain/entities/types'
 import { computeSummary } from '../../domain/services/financialCalc'
 import { formatCurrency } from '../../utils/currency'
+import { valueColor } from '../../utils/colors'
 import { useGameStore } from '../../store/gameStore'
 import { AnchorProgressBar } from '../progress/AnchorProgressBar'
-import { PassiveIncomeGauge } from './PassiveIncomeGauge'
 import { InfoLabel, TERM_INFO, type ConceptInfo } from '../ui/conceptInfo'
 
 interface Props { player: PlayerState }
@@ -13,14 +13,16 @@ export function FinancialSheet({ player }: Props) {
   const { finances } = player
   const s = computeSummary(finances)
   const payOffDebt = useGameStore((st) => st.payOffDebt)
+  const takeLoan = useGameStore((st) => st.takeLoan)
   const currentId = useGameStore((st) => (st.game ? st.game.players[st.game.currentPlayerIndex].id : null))
   const isCurrent = currentId === player.id
+  const canBorrow = isCurrent && player.boardTrack !== 'fast_track'
 
   return (
     <div className="flex flex-col gap-0 text-xs" style={{ color: 'var(--color-snow)' }}>
 
       {/* INCOME */}
-      <Section label="Income" color="var(--color-seafoam)" info={TERM_INFO.income}>
+      <Section label="Income" color="var(--color-mist)" info={TERM_INFO.income}>
         <TableHeader left="Source" right="Cash Flow/mo" />
         {finances.incomeSources.map((src) => (
           <TableRow
@@ -31,7 +33,7 @@ export function FinancialSheet({ player }: Props) {
                 {src.isPassive && (
                   <span
                     className="ml-1.5 text-[9px] font-bold px-1 py-px"
-                    style={{ background: 'rgba(45,212,191,0.15)', color: 'var(--color-seafoam)', borderRadius: '2px' }}
+                    style={{ background: 'var(--color-wire)', color: 'var(--color-mist)', borderRadius: '2px' }}
                   >
                     PASSIVE
                   </span>
@@ -45,7 +47,7 @@ export function FinancialSheet({ player }: Props) {
       </Section>
 
       {/* EXPENSES */}
-      <Section label="Expenses" color="var(--color-flame)" info={TERM_INFO.expenses}>
+      <Section label="Expenses" color="var(--color-fog)" info={TERM_INFO.expenses}>
         <TableHeader left="Item" right="Amount/mo" />
         {finances.expenseLines.map((e) => (
           <TableRow key={e.id} left={e.label} right={<Num value={-e.monthlyAmount} />} />
@@ -53,22 +55,6 @@ export function FinancialSheet({ player }: Props) {
         <TotalRow left="Total Expenses" right={<Num value={-s.totalMonthlyExpenses} bold />} />
       </Section>
 
-      {/* CASHFLOW SUMMARY */}
-      <div
-        className="mx-3 my-3 p-3"
-        style={{
-          background: 'var(--color-card)',
-          border: '1px solid var(--color-wire)',
-          borderRadius: '3px',
-        }}
-      >
-        <SummaryRow label="Cash on Hand" value={formatCurrency(finances.cashBalance)} bold color="var(--color-snow)" info={TERM_INFO.cash} />
-        <SummaryRow label="Total Income" value={formatCurrency(s.totalMonthlyIncome)} color="var(--color-seafoam)" />
-        <SummaryRow label="Total Expenses" value={formatCurrency(-s.totalMonthlyExpenses)} color="var(--color-flame)" />
-        <div className="mt-1.5 pt-1.5" style={{ borderTop: '1px solid var(--color-wire)' }}>
-          <SummaryRow label="Payday / Monthly CF" value={formatCurrency(s.monthlyCashFlow)} bold color={s.monthlyCashFlow >= 0 ? 'var(--color-seafoam)' : 'var(--color-flame)'} info={TERM_INFO.cashFlow} />
-        </div>
-      </div>
 
       {/* ASSETS + LIABILITIES side by side */}
       <div className="flex" style={{ borderTop: '1px solid var(--color-rim)' }}>
@@ -76,12 +62,12 @@ export function FinancialSheet({ player }: Props) {
         <div className="flex-1" style={{ borderRight: '1px solid var(--color-rim)' }}>
           <div
             className="px-3 py-1.5 flex items-center gap-2"
-            style={{ background: 'rgba(45,212,191,0.06)', borderBottom: '1px solid var(--color-rim)' }}
+            style={{ background: 'var(--color-rim)', borderBottom: '1px solid var(--color-rim)' }}
           >
             <InfoLabel
               info={TERM_INFO.assets}
               className="text-[10px] font-bold tracking-widest uppercase"
-              style={{ color: 'var(--color-seafoam)' }}
+              style={{ color: 'var(--color-mist)' }}
             >
               Assets
             </InfoLabel>
@@ -108,12 +94,12 @@ export function FinancialSheet({ player }: Props) {
         <div className="flex-1">
           <div
             className="px-3 py-1.5 flex items-center gap-2"
-            style={{ background: 'rgba(240,96,112,0.06)', borderBottom: '1px solid var(--color-rim)' }}
+            style={{ background: 'var(--color-rim)', borderBottom: '1px solid var(--color-rim)' }}
           >
             <InfoLabel
               info={TERM_INFO.liabilities}
               className="text-[10px] font-bold tracking-widest uppercase"
-              style={{ color: 'var(--color-flame)' }}
+              style={{ color: 'var(--color-fog)' }}
             >
               Liabilities
             </InfoLabel>
@@ -137,7 +123,7 @@ export function FinancialSheet({ player }: Props) {
                       <button
                         onClick={() => payOffDebt(l.id, 1)}
                         className="text-[9px] mt-0.5 px-1.5 py-px transition-opacity hover:opacity-80"
-                        style={{ color: 'var(--color-seafoam)', border: '1px solid rgba(45,212,191,0.3)', borderRadius: '2px', background: 'transparent', cursor: 'pointer' }}
+                        style={{ color: 'var(--color-mist)', border: '1px solid var(--color-wire)', borderRadius: '2px', background: 'transparent', cursor: 'pointer' }}
                       >
                         {isBankLoan ? 'Repay $1k' : `Pay off ${formatCurrency(l.totalOwed)}`}
                       </button>
@@ -146,37 +132,22 @@ export function FinancialSheet({ player }: Props) {
                 )
               })
             )}
+            {canBorrow && (
+              <button
+                onClick={() => takeLoan(1000)}
+                className="mt-1 text-[9px] px-1.5 py-px transition-opacity hover:opacity-80"
+                style={{ color: 'var(--color-mist)', border: '1px solid var(--color-wire)', borderRadius: '2px', background: 'transparent', cursor: 'pointer' }}
+              >
+                Borrow $1k
+              </button>
+            )}
             <ALTotal label="Total Liabilities" value={<Num value={-s.totalLiabilities} bold />} />
           </div>
         </div>
       </div>
 
-      {/* NET WORTH */}
-      <div
-        className="mx-3 mt-2 mb-3 px-3 py-2 flex justify-between items-center"
-        style={{
-          background: 'var(--color-card)',
-          border: '1px solid var(--color-wire)',
-          borderRadius: '3px',
-        }}
-      >
-        <InfoLabel info={TERM_INFO.netWorth} className="text-xs font-semibold" style={{ color: 'var(--color-mist)' }}>
-          Net Worth
-        </InfoLabel>
-        <span
-          className="text-sm font-bold"
-          style={{
-            color: s.netWorth >= 0 ? 'var(--color-seafoam)' : 'var(--color-flame)',
-            fontFamily: 'var(--font-data)',
-          }}
-        >
-          {formatCurrency(s.netWorth)}
-        </span>
-      </div>
-
       {/* PROGRESS */}
-      <div className="px-3 pb-4 space-y-4" style={{ borderTop: '1px solid var(--color-rim)', paddingTop: '12px' }}>
-        <PassiveIncomeGauge player={player} />
+      <div className="px-3 pb-4" style={{ borderTop: '1px solid var(--color-rim)', paddingTop: '12px' }}>
         <AnchorProgressBar player={player} />
       </div>
 
@@ -240,23 +211,6 @@ function TotalRow({ left, right }: { left: string; right: ReactNode }) {
   )
 }
 
-function SummaryRow({ label, value, bold, color, info }: { label: string; value: string; bold?: boolean; color?: string; info?: ConceptInfo }) {
-  return (
-    <div className="flex justify-between items-center py-0.5">
-      {info ? (
-        <InfoLabel info={info} className="text-[11px]" style={{ color: 'var(--color-fog)' }}>{label}</InfoLabel>
-      ) : (
-        <span className="text-[11px]" style={{ color: 'var(--color-fog)' }}>{label}</span>
-      )}
-      <span
-        className={bold ? 'font-bold' : 'font-medium'}
-        style={{ color: color ?? 'var(--color-snow)', fontFamily: 'var(--font-data)', fontSize: '12px' }}
-      >
-        {value}
-      </span>
-    </div>
-  )
-}
 
 function ALHeader({ left, right }: { left: string; right: string }) {
   return (
@@ -275,7 +229,7 @@ function ALRow({ label, value, sub }: { label: string; value: ReactNode; sub?: s
         <span>{value}</span>
       </div>
       {sub && (
-        <span className="text-[9px]" style={{ color: 'var(--color-seafoam)', fontFamily: 'var(--font-data)' }}>{sub}</span>
+        <span className="text-[9px]" style={{ color: 'var(--color-mist)', fontFamily: 'var(--font-data)' }}>{sub}</span>
       )}
     </div>
   )
@@ -298,7 +252,7 @@ function Num({ value, bold }: { value: number; bold?: boolean }) {
     <span
       className={bold ? 'font-bold' : 'font-medium'}
       style={{
-        color: value >= 0 ? 'var(--color-seafoam)' : 'var(--color-flame)',
+        color: valueColor(value),
         fontFamily: 'var(--font-data)',
         fontSize: '11px',
       }}

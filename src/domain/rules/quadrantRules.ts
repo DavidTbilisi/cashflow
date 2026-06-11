@@ -22,6 +22,21 @@ export function canAdvanceQuadrant(player: PlayerState): boolean {
   }
 }
 
+const QUADRANT_ORDER: ESBIQuadrant[] = ['E', 'S', 'B', 'I']
+
+/**
+ * Per-turn quadrant progression — the ESBI counterpart of `evaluateAnchors`.
+ * Advances the player one step (E→S→B→I) when, and only when, the
+ * `canAdvanceQuadrant` gate for their current quadrant is satisfied. Drawn
+ * `quadrant_advance` cards remain a separate, explicit shortcut (mirroring how
+ * `anchor_unlock` cards bypass anchor thresholds).
+ */
+export function evaluateQuadrant(player: PlayerState): PlayerState {
+  if (!canAdvanceQuadrant(player)) return player
+  const next = QUADRANT_ORDER[QUADRANT_ORDER.indexOf(player.quadrant) + 1]
+  return next ? { ...player, quadrant: next } : player
+}
+
 export const QUADRANT_LABELS: Record<ESBIQuadrant, string> = {
   E: 'Employee',
   S: 'Self-Employed',

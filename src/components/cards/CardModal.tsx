@@ -15,7 +15,6 @@ const TYPE_META: Record<string, { color: string; label: string }> = {
   system_building:     { color: '#A87BF0', label: 'System' },
   decision_temptation: { color: '#F0A050', label: 'Decision' },
   obstacle_challenge:  { color: '#F06070', label: 'Obstacle' },
-  reversal:            { color: '#F06070', label: 'Reversal' },
 }
 
 const DECLINABLE = new Set(['asset_acquisition', 'decision_temptation', 'small_deal', 'big_deal'])

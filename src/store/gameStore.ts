@@ -6,6 +6,7 @@ import { DREAMS, FAST_TRACK_BUSINESSES } from '../domain/data/fastTrack'
 import { buildDecks, drawCard } from '../domain/services/cardService'
 import { initDice, rollDice, diceCountFor, diceTotal } from '../domain/services/diceService'
 import { makeDefaultAnchors, evaluateAnchors } from '../domain/rules/anchorRules'
+import { evaluateQuadrant } from '../domain/rules/quadrantRules'
 import {
   applyCardEffect,
   computeSummary,
@@ -332,8 +333,9 @@ export const useGameStore = create<GameStore>()(
 
       if (event.type === 'END_TURN' && game.currentTurnPhase === 'end_check') {
         let state = { ...game }
-        // Evaluate anchors (custom layer) for the player who just acted.
+        // Evaluate anchors + ESBI quadrant (custom layer) for the player who just acted.
         let acted = evaluateAnchors(state.players[idx], state.turn)
+        acted = evaluateQuadrant(acted)
         // Charity's extra die counts down each Rat Race turn.
         if (acted.extraDiceTurns > 0 && acted.boardTrack === 'rat_race') {
           acted = { ...acted, extraDiceTurns: acted.extraDiceTurns - 1 }

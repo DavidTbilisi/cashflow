@@ -8,6 +8,7 @@ import {
   applyCardEffect,
 } from '../../domain/services/financialCalc'
 import { useGameStore } from '../../store/gameStore'
+import { RAT_RACE_SPACES } from '../../domain/data/boardSpaces'
 import { makePlayer, makeFinances } from '../fixtures'
 
 // ── Children / child expense ────────────────────────────────────────────────
@@ -32,6 +33,12 @@ describe('child expenses', () => {
     expect(p.finances.numberOfChildren).toBe(3)
     p = applyCardEffect(p, { type: 'add_child' }, 1)
     expect(p.finances.numberOfChildren).toBe(3) // capped
+  })
+
+  it('places reachable Baby spaces on the Rat Race board', () => {
+    // Without these tiles the add_child mechanic is unreachable in play.
+    const babies = RAT_RACE_SPACES.filter((s) => s.type === 'baby')
+    expect(babies.map((s) => s.index)).toEqual([9, 19, 32])
   })
 })
 
@@ -142,6 +149,23 @@ describe('store: rulebook spaces', () => {
     expect(p.finances.cashBalance).toBe(beforeCash - Math.round(income * 0.1))
     expect(p.extraDiceTurns).toBe(3)
     expect(game().currentTurnPhase).toBe('end_check')
+  })
+
+  it('Baby: landing on a Baby space adds a child and shows the Baby! event', () => {
+    // Baby tiles sit at rat-race indices 9/19/32 — from 8, roll [1] lands on 9.
+    useGameStore.setState({
+      game: {
+        ...game(),
+        players: [makePlayer({ boardPosition: 8, boardTrack: 'rat_race' })],
+        currentTurnPhase: 'rolling',
+        lastDiceRoll: [1],
+      },
+    })
+    useGameStore.getState().dispatch({ type: 'MOVE_COMPLETE' })
+    const p = game().players[0]
+    expect(p.boardPosition).toBe(9)
+    expect(p.finances.numberOfChildren).toBe(1)
+    expect(game().activeCard?.title).toBe('Baby!')
   })
 
   it('Business purchase adds its cash flow to CASHFLOW Day income', () => {

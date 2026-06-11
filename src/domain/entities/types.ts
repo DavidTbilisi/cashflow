@@ -17,7 +17,6 @@ export type CardType =
   | 'system_building'
   | 'decision_temptation'
   | 'obstacle_challenge'
-  | 'reversal'
   | 'event' // synthetic, store-generated notification (Baby, Downsized, Tax Audit…)
 
 export type BoardTrack = 'rat_race' | 'fast_track'

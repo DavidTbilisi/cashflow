@@ -45,12 +45,12 @@ export function buildDecks(seed: number): Record<CardType, Card[]> {
 export function drawCard(
   deck: Card[],
   discard: Card[],
-): { card: Card; deck: Card[] } {
+): { card: Card | null; deck: Card[] } {
   if (deck.length === 0) {
+    if (discard.length === 0) return { card: null, deck: [] }
     // Reshuffle discard into deck
     deck = shuffle(discard, createRng(discard.length * 31))
-    discard = []
   }
   const [card, ...rest] = deck
-  return { card, deck: rest }
+  return { card: card ?? null, deck: rest }
 }

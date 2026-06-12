@@ -1,20 +1,6 @@
 import type { BoardSpace, SpaceType, CardType } from '../entities/types'
 import { DREAMS, FAST_TRACK_BUSINESSES } from './fastTrack'
 
-// Board layout helpers — placeholder pixel positions; the renderer computes the
-// real geometry from utils/boardGeometry.ts. These keep BoardSpace well-formed.
-function ratRacePos(i: number, total: number): { pixelX: number; pixelY: number } {
-  const angle = (i / total) * Math.PI * 2 - Math.PI / 2
-  const r = 260
-  return { pixelX: 400 + Math.cos(angle) * r, pixelY: 350 + Math.sin(angle) * r }
-}
-
-function fastTrackPos(i: number, total: number): { pixelX: number; pixelY: number } {
-  const angle = (i / total) * Math.PI * 2 - Math.PI / 2
-  const r = 380
-  return { pixelX: 400 + Math.cos(angle) * r, pixelY: 350 + Math.sin(angle) * r }
-}
-
 const RAT_RACE_COUNT = 40
 const FAST_TRACK_COUNT = 24
 
@@ -59,7 +45,7 @@ const RR_PLAN: Record<number, { type: SpaceType; label: string; deck?: CardType 
 }
 
 export const RAT_RACE_SPACES: BoardSpace[] = Array.from({ length: RAT_RACE_COUNT }, (_, i) => {
-  const base: BoardSpace = { id: `rr_${i}`, index: i, track: 'rat_race', type: 'neutral', label: '', ...ratRacePos(i, RAT_RACE_COUNT) }
+  const base: BoardSpace = { id: `rr_${i}`, index: i, track: 'rat_race', type: 'neutral', label: '' }
 
   if (RR_PAYDAY.has(i)) return { ...base, type: 'payday', label: 'PAYDAY' }
   if (RR_ANCHORS[i]) {
@@ -89,7 +75,7 @@ const FT_SPECIAL: Record<number, { type: SpaceType; label: string }> = {
 }
 
 export const FAST_TRACK_SPACES: BoardSpace[] = Array.from({ length: FAST_TRACK_COUNT }, (_, i) => {
-  const base: BoardSpace = { id: `ft_${i}`, index: i, track: 'fast_track', type: 'neutral', label: '', ...fastTrackPos(i, FAST_TRACK_COUNT) }
+  const base: BoardSpace = { id: `ft_${i}`, index: i, track: 'fast_track', type: 'neutral', label: '' }
 
   if (FT_CASHFLOW.has(i)) return { ...base, type: 'cashflow_day', label: 'CASHFLOW Day' }
 

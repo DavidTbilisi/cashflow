@@ -13,7 +13,11 @@ export function saveGame(state: GameState): void {
 export function loadGame(): GameState | null {
   try {
     const raw = localStorage.getItem(KEY)
-    return raw ? (JSON.parse(raw) as GameState) : null
+    if (!raw) return null
+    const state = JSON.parse(raw) as GameState
+    state.history ??= {}
+    state.turnLog ??= []
+    return state
   } catch {
     return null
   }

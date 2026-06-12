@@ -16,7 +16,6 @@
   "packageManager": "pnpm@10.32.1",
   "dependencies": {
     "framer-motion": "^12.40.0",
-    "pixi.js": "^8.19.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "zustand": "^5.0.14"

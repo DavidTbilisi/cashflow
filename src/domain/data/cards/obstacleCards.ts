@@ -37,7 +37,7 @@ export const obstacleCards: Card[] = [
     id: 'obs_05',
     type: 'obstacle_challenge',
     title: 'Market Crash',
-    description: 'Your portfolio drops 30% in value. Behavioral test: sell at the bottom?',
+    description: 'Market panic costs you $2,000 in cash reserves. Behavioral test: sell at the bottom?',
     effects: [{ type: 'cash_loss', amount: 2000 }],
     lesson: 'Volatility is the tuition for long-term returns. Those who stay, win.',
   },

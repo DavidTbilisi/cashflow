@@ -45,8 +45,8 @@ export const QUADRANT_LABELS: Record<ESBIQuadrant, string> = {
 }
 
 export const QUADRANT_COLORS: Record<ESBIQuadrant, string> = {
-  E: '#6b7280',
-  S: '#f59e0b',
-  B: '#3b82f6',
-  I: '#10b981',
+  E: '#6E6E6E',
+  S: '#9A9A9A',
+  B: '#CFCFCF',
+  I: '#E6E6E6',
 }

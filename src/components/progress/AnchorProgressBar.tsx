@@ -3,12 +3,12 @@ import { Tooltip } from '../ui/Tooltip'
 import { ANCHOR_INFO, InfoContent } from '../ui/conceptInfo'
 
 const ANCHORS: { id: AnchorId; icon: string; label: string }[] = [
-  { id: 'door',   icon: '🚪', label: 'Door' },
-  { id: 'scale',  icon: '⚖️', label: 'Scale' },
-  { id: 'safe',   icon: '🔒', label: 'Safe' },
-  { id: 'chain',  icon: '⛓️', label: 'Chain' },
-  { id: 'engine', icon: '⚙️', label: 'Engine' },
-  { id: 'shield', icon: '🛡️', label: 'Shield' },
+  { id: 'door',   icon: 'D', label: 'Door' },
+  { id: 'scale',  icon: 'Sc', label: 'Scale' },
+  { id: 'safe',   icon: 'Sf', label: 'Safe' },
+  { id: 'chain',  icon: 'Ch', label: 'Chain' },
+  { id: 'engine', icon: 'En', label: 'Engine' },
+  { id: 'shield', icon: 'Sh', label: 'Shield' },
 ]
 
 interface Props { player: PlayerState }
@@ -44,18 +44,20 @@ export function AnchorProgressBar({ player }: Props) {
                 <div
                   className="w-7 h-7 flex items-center justify-center text-sm transition-all duration-300"
                   style={{
-                    background: unlocked ? 'rgba(200,150,60,0.15)' : 'var(--color-rim)',
-                    border: `1px solid ${unlocked ? 'rgba(200,150,60,0.45)' : 'transparent'}`,
+                    background: unlocked ? 'var(--color-wire)' : 'var(--color-rim)',
+                    border: `1px solid ${unlocked ? 'var(--color-mist)' : 'transparent'}`,
                     borderRadius: '3px',
-                    filter: unlocked ? 'none' : 'grayscale(1) brightness(0.25)',
-                    boxShadow: unlocked ? '0 0 7px rgba(200,150,60,0.35)' : 'none',
+                    fontSize: '9px',
+                    fontFamily: 'var(--font-data)',
+                    fontWeight: 600,
+                    color: unlocked ? 'var(--color-snow)' : 'var(--color-wire)',
                   }}
                 >
                   {icon}
                 </div>
                 <span
                   className="text-[8px] truncate w-full text-center"
-                  style={{ color: unlocked ? 'var(--color-gold)' : 'var(--color-fog)' }}
+                  style={{ color: unlocked ? 'var(--color-mist)' : 'var(--color-fog)' }}
                 >
                   {label}
                 </span>
@@ -73,7 +75,7 @@ export function AnchorProgressBar({ player }: Props) {
           className="h-full transition-all duration-700"
           style={{
             width: `${(completedCount / 6) * 100}%`,
-            background: 'var(--color-gold)',
+            background: 'var(--color-snow)',
           }}
         />
       </div>

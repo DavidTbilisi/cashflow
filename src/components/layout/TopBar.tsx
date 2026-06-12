@@ -5,10 +5,10 @@ import { formatShort } from '../../utils/currency'
 import { InfoLabel, TERM_INFO } from '../ui/conceptInfo'
 
 const PHASE_META: Record<string, { color: string; label: string }> = {
-  idle:      { color: '#2DD4BF', label: 'Ready' },
-  rolling:   { color: '#5B8FF9', label: 'Rolling' },
-  action:    { color: '#F0A050', label: 'Action' },
-  end_check: { color: '#C8963C', label: 'End Turn' },
+  idle:      { color: '#9A9A9A', label: 'Ready' },
+  rolling:   { color: '#CFCFCF', label: 'Rolling' },
+  action:    { color: '#CFCFCF', label: 'Action' },
+  end_check: { color: '#9A9A9A', label: 'End Turn' },
 }
 
 export function TopBar() {
@@ -44,16 +44,16 @@ export function TopBar() {
               key={p.id}
               className="flex items-center gap-1.5 px-2.5 py-1 text-xs transition-all"
               style={{
-                background: isActive ? p.color + '18' : 'transparent',
-                border: `1px solid ${isActive ? p.color + '55' : 'var(--color-rim)'}`,
+                background: isActive ? 'var(--color-wire)' : 'transparent',
+                border: `1px solid ${isActive ? 'var(--color-mist)' : 'var(--color-rim)'}`,
                 borderRadius: '3px',
                 opacity: isActive ? 1 : 0.45,
               }}
             >
               <span
-                className="w-1.5 h-1.5 rounded-full"
-                style={{ background: p.color }}
-              />
+                className="text-[9px] font-bold"
+                style={{ color: 'var(--color-mist)', fontFamily: 'var(--font-data)' }}
+              >P{i + 1}</span>
               <span style={{ color: 'var(--color-snow)', fontFamily: 'var(--font-ui)' }} className="font-medium">
                 {p.name}
               </span>
@@ -68,7 +68,7 @@ export function TopBar() {
           <InfoLabel info={TERM_INFO.netWorth}>Net Worth</InfoLabel>{' '}
           <span
             style={{
-              color: summary.netWorth >= 0 ? 'var(--color-seafoam)' : 'var(--color-flame)',
+              color: 'var(--color-snow)',
               fontFamily: 'var(--font-data)',
               fontWeight: 600,
             }}

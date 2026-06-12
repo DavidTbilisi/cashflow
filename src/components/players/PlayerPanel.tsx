@@ -1,5 +1,6 @@
 import { useGameStore } from '../../store/gameStore'
 import { ESBIIndicator } from '../progress/ESBIIndicator'
+import { PassiveIncomeGauge } from '../financial/PassiveIncomeGauge'
 import { computeSummary } from '../../domain/services/financialCalc'
 import { canEnterFastTrack } from '../../domain/rules/winRules'
 import { formatCurrency } from '../../utils/currency'
@@ -9,8 +10,6 @@ export function PlayerPanel() {
   const game = useGameStore((s) => s.game)
   const dispatch = useGameStore((s) => s.dispatch)
   const rollDiceWith = useGameStore((s) => s.rollDiceWith)
-  const takeLoan = useGameStore((s) => s.takeLoan)
-  const payOffDebt = useGameStore((s) => s.payOffDebt)
   const moveToFastTrack = useGameStore((s) => s.moveToFastTrack)
   const phase = game?.currentTurnPhase
 
@@ -25,7 +24,6 @@ export function PlayerPanel() {
   const canEndTurn = phase === 'end_check'
   const mustSkip = player.skipTurns > 0
   const canPromote = idle && canEnterFastTrack(player)
-  const bankLoan = player.finances.liabilities.find((l) => l.id === 'bank_loan')
   const steps = (game.lastDiceRoll ?? []).reduce((a, b) => a + b, 0)
 
   return (
@@ -92,6 +90,10 @@ export function PlayerPanel() {
         />
       </div>
 
+      <div className="pt-1" style={{ borderTop: '1px solid var(--color-rim)' }}>
+        <PassiveIncomeGauge player={player} />
+      </div>
+
       {onFastTrack && (
         <div className="space-y-1.5 pt-2" style={{ borderTop: '1px solid var(--color-rim)' }}>
           <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--color-fog)' }}>
@@ -112,33 +114,6 @@ export function PlayerPanel() {
       )}
 
       <div className="mt-auto space-y-2">
-        {/* Bank: borrow / repay in $1,000 units (Rat Race only). */}
-        {!onFastTrack && (
-          <div className="flex gap-1.5">
-            <button
-              onClick={() => takeLoan(1000)}
-              className="flex-1 py-1.5 text-[10px] font-medium tracking-wider uppercase transition-all"
-              style={{ border: '1px solid var(--color-wire)', color: 'var(--color-mist)', borderRadius: '3px', background: 'transparent', cursor: 'pointer' }}
-            >
-              Borrow $1k
-            </button>
-            <button
-              onClick={() => payOffDebt('bank_loan', 1)}
-              disabled={!bankLoan || player.finances.cashBalance < 1000}
-              className="flex-1 py-1.5 text-[10px] font-medium tracking-wider uppercase transition-all"
-              style={{
-                border: '1px solid var(--color-wire)',
-                color: !bankLoan || player.finances.cashBalance < 1000 ? 'var(--color-fog)' : 'var(--color-mist)',
-                borderRadius: '3px',
-                background: 'transparent',
-                cursor: !bankLoan || player.finances.cashBalance < 1000 ? 'not-allowed' : 'pointer',
-              }}
-            >
-              Repay $1k
-            </button>
-          </div>
-        )}
-
         {canPromote && (
           <button
             onClick={moveToFastTrack}

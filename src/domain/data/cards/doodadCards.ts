@@ -47,8 +47,11 @@ export const doodadCards: Card[] = [
     id: 'dd_boat',
     type: 'doodad',
     title: 'Boat Down Payment',
-    description: '"A boat is a hole in the water you throw money into." Pay $3,000.',
-    effects: [{ type: 'cash_loss', amount: 3000 }],
+    description: '"A boat is a hole in the water you throw money into." Pay $3,000 down, plus $150/mo in storage and maintenance.',
+    effects: [
+      { type: 'cash_loss', amount: 3000 },
+      { type: 'add_expense', monthlyAmount: 150, label: 'Boat Maintenance', isFixed: false },
+    ],
     lesson: 'Big toys are big liabilities — they take money out every month you own them.',
   },
   {

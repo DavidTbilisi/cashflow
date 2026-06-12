@@ -36,11 +36,6 @@ export function Sidebar() {
           {player.name}
         </span>
         <ESBIIndicator quadrant={player.quadrant} />
-        <div className="flex flex-col items-end">
-          <span className="text-[9px] uppercase tracking-widest" style={{ color: 'var(--color-fog)' }}>
-            Financial Statement
-          </span>
-        </div>
       </div>
 
       {/* Scrollable financial sheet */}

@@ -60,6 +60,33 @@ export type TurnEvent =
   | { type: 'NECST_COMPLETE'; passed: boolean }
   | { type: 'END_TURN' }
 
+export interface PlayerHistoryPoint {
+  turn: number
+  netWorth: number
+  passiveIncome: number
+  totalIncome: number
+  totalExpenses: number
+  cashFlow: number
+  cashBalance: number
+}
+
+export type TurnLogKind = 'landing' | 'income' | 'card' | 'charity' | 'purchase' | 'penalty' | 'fast_track' | 'note'
+
+export interface TurnLogEntry {
+  id: string
+  turn: number
+  round: number
+  playerId: string
+  playerName: string
+  kind: TurnLogKind
+  spaceId?: string
+  fromPos?: number
+  toPos?: number
+  roll?: number
+  cashDelta?: number
+  text: string
+}
+
 // ── Asset ─────────────────────────────────────────────────────────────────
 
 export type AssetClass =
@@ -195,8 +222,6 @@ export interface BoardSpace {
   /** Fast Track 'business_investment' space → id into FAST_TRACK_BUSINESSES. */
   businessId?: string
   cardDeckFilter?: CardType[]
-  pixelX: number
-  pixelY: number
 }
 
 // ── Cards ─────────────────────────────────────────────────────────────────
@@ -286,4 +311,6 @@ export interface GameState {
   createdAt: string
   updatedAt: string
   rngSeed: number
+  history: Record<string, PlayerHistoryPoint[]>
+  turnLog: TurnLogEntry[]
 }

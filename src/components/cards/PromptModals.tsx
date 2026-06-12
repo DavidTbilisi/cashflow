@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { useGameStore } from '../../store/gameStore'
 import { computeSummary } from '../../domain/services/financialCalc'
 import { formatCurrency } from '../../utils/currency'
+import { KbdHint } from '../ui/KbdHint'
 
 function ModalShell({ accent, label, title, children }: { accent: string; label: string; title: string; children: ReactNode }) {
   return (
@@ -42,7 +43,7 @@ function ModalShell({ accent, label, title, children }: { accent: string; label:
   )
 }
 
-function PrimaryBtn({ onClick, disabled, color, children }: { onClick: () => void; disabled?: boolean; color: string; children: ReactNode }) {
+function PrimaryBtn({ onClick, disabled, color, hint, children }: { onClick: () => void; disabled?: boolean; color: string; hint?: string; children: ReactNode }) {
   return (
     <button
       onClick={onClick}
@@ -56,12 +57,12 @@ function PrimaryBtn({ onClick, disabled, color, children }: { onClick: () => voi
         cursor: disabled ? 'not-allowed' : 'pointer',
       }}
     >
-      {children}
+      {children}{hint && !disabled && <KbdHint k={hint} />}
     </button>
   )
 }
 
-function GhostBtn({ onClick, children }: { onClick: () => void; children: ReactNode }) {
+function GhostBtn({ onClick, hint, children }: { onClick: () => void; hint?: string; children: ReactNode }) {
   return (
     <button
       onClick={onClick}
@@ -70,7 +71,7 @@ function GhostBtn({ onClick, children }: { onClick: () => void; children: ReactN
       onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--color-rim)' }}
       onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
     >
-      {children}
+      {children}{hint && <KbdHint k={hint} />}
     </button>
   )
 }
@@ -78,7 +79,7 @@ function GhostBtn({ onClick, children }: { onClick: () => void; children: ReactN
 // ── Opportunity: choose Small Deal or Big Deal ──────────────────────────────
 export function DealChooser() {
   const chooseDeal = useGameStore((s) => s.chooseDeal)
-  const Card = ({ size, color, title, sub }: { size: 'small' | 'big'; color: string; title: string; sub: string }) => (
+  const Card = ({ size, color, title, sub }: { size: 'small' | 'big'; color: string; title: ReactNode; sub: string }) => (
     <button
       onClick={() => chooseDeal(size)}
       className="w-full text-left p-3 transition-all hover:opacity-90"
@@ -92,8 +93,8 @@ export function DealChooser() {
     <ModalShell accent="#9bbb4c" label="Opportunity" title="Choose Your Deal">
       <p className="text-sm mb-4" style={{ color: 'var(--color-mist)' }}>Which kind of opportunity do you want to draw?</p>
       <div className="flex flex-col gap-2">
-        <Card size="small" color="#5B8FF9" title="Small Deal" sub="Stocks & small real estate · ≤ $5,000 to get in" />
-        <Card size="big" color="#C8963C" title="Big Deal" sub="Apartments & businesses · $6,000+ to get in" />
+        <Card size="small" color="#5B8FF9" title={<>Small Deal<KbdHint k="1" /></>} sub="Stocks & small real estate · ≤ $5,000 to get in" />
+        <Card size="big" color="#C8963C" title={<>Big Deal<KbdHint k="2" /></>} sub="Apartments & businesses · $6,000+ to get in" />
       </div>
     </ModalShell>
   )
@@ -115,8 +116,8 @@ export function CharityModal() {
         {ratRace ? 'to roll two dice on each of your next 3 turns.' : 'to choose how many dice you roll for the rest of the game.'}
       </p>
       <div className="flex gap-2">
-        <GhostBtn onClick={decline}>Decline</GhostBtn>
-        <PrimaryBtn onClick={accept} disabled={player.finances.cashBalance < tithe} color="#d9799f">
+        <GhostBtn onClick={decline} hint="Esc">Decline</GhostBtn>
+        <PrimaryBtn onClick={accept} disabled={player.finances.cashBalance < tithe} color="#d9799f" hint="↵">
           {player.finances.cashBalance < tithe ? 'Not enough cash' : `Donate ${formatCurrency(tithe)}`}
         </PrimaryBtn>
       </div>
@@ -155,7 +156,7 @@ export function MarketModal() {
         })}
       </div>
       <div className="flex">
-        <GhostBtn onClick={pass}>Keep · Pass</GhostBtn>
+        <GhostBtn onClick={pass} hint="Esc">Keep · Pass</GhostBtn>
       </div>
     </ModalShell>
   )
@@ -186,8 +187,8 @@ export function PurchaseModal() {
         </span>
       </div>
       <div className="flex gap-2">
-        <GhostBtn onClick={skip}>Skip</GhostBtn>
-        <PrimaryBtn onClick={buy} disabled={!afford} color={accent}>
+        <GhostBtn onClick={skip} hint="Esc">Skip</GhostBtn>
+        <PrimaryBtn onClick={buy} disabled={!afford} color={accent} hint="↵">
           {afford ? (isDream ? 'Buy Dream' : 'Buy Business') : 'Not enough cash'}
         </PrimaryBtn>
       </div>

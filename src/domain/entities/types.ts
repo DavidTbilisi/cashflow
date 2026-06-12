@@ -206,6 +206,12 @@ export interface PlayerState {
   businessesOwned: string[]
   /** Purchased Dream space ids. */
   dreamsOwned: string[]
+
+  // ── Time as Asset ──
+  /** Free hours per month (0–timeCapacity). Spend to negotiate Doodads and unlock advantages. */
+  freeTimeUnits: number
+  /** Maximum free time — set by quadrant, grows as you advance E→S→B→I. */
+  timeCapacity: number
 }
 
 // ── Board ─────────────────────────────────────────────────────────────────
@@ -306,6 +312,8 @@ export interface GameState {
   /** Markers left when a player lands on another's chosen Dream — each adds 100% to that Dream's cost. Keyed by dreamId. */
   dreamMarkers: Record<string, number>
   lastDiceRoll: number[] | null
+  /** True once the player has already negotiated the active Doodad this turn. */
+  doodadNegotiated: boolean
   winnerId: string | null
   failureReason: string | null
   createdAt: string

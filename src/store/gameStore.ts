@@ -14,17 +14,24 @@ import {
   takeBankLoan,
   payOffLiability,
   sellAsset,
+  scaleDoodadToPlayer,
 } from '../domain/services/financialCalc'
 import { evaluateWinConditions, canEnterFastTrack } from '../domain/rules/winRules'
 import { scoreNECST } from '../domain/rules/necstTest'
 import type { StartingProfile } from '../domain/data/startingProfiles'
+import { TIME_BASE, TIME_CAPACITY, DOODAD_NEGOTIATE_COST } from '../domain/services/timeService'
 import { formatCurrency } from '../utils/currency'
 import { saveGame } from '../utils/persistence'
+
+// Dev-only: consumed once by the next ROLL_DICE dispatch.
+let _debugDiceOverride: number[] | null = null
 
 interface GameStore {
   game: GameState | null
   initGame: (players: Array<{ name: string; color: string; profile: StartingProfile; dreamId?: string | null }>, seed?: number) => void
   dispatch: (event: TurnEvent) => void
+  /** Spend 2 time units to halve the active Doodad's expense. One use per card. */
+  negotiateDoodad: () => void
   /** Fast Track Charity perk: roll a chosen number of dice (1–3). */
   rollDiceWith: (count: number) => void
   resolveCard: (card: Card, accepted: boolean) => void
@@ -43,6 +50,10 @@ interface GameStore {
   /** Borrow the shortfall and purchase a deal card atomically — logged as one event. */
   borrowAndBuy: (card: Card) => void
   resetGame: () => void
+  // Dev-only debug actions (no-op in production builds):
+  debugSetDice: (values: number[]) => void
+  debugGiveMoney: (amount: number) => void
+  debugForceTrack: (track: 'rat_race' | 'fast_track') => void
 }
 
 function makePlayer(
@@ -77,6 +88,8 @@ function makePlayer(
     cashflowDayGoal: 0,
     businessesOwned: [],
     dreamsOwned: [],
+    freeTimeUnits: TIME_BASE[profile.quadrant],
+    timeCapacity: TIME_CAPACITY[profile.quadrant],
   }
 }
 
@@ -110,7 +123,7 @@ function setPlayer(state: GameState, idx: number, player: PlayerState): GameStat
 
 /** Move to the end-of-turn check, clearing any open prompts. */
 function endCheck(state: GameState): GameState {
-  return { ...state, currentTurnPhase: 'end_check', activeCard: null, pendingPurchase: null, marketOffer: null }
+  return { ...state, currentTurnPhase: 'end_check', activeCard: null, pendingPurchase: null, marketOffer: null, doodadNegotiated: false }
 }
 
 function eventCard(title: string, description: string): Card {
@@ -189,7 +202,8 @@ function routeLanding(state: GameState, space: BoardSpace): GameState {
     case 'doodad': {
       const { card, decks } = drawFrom('doodad')
       if (!card) return endCheck({ ...state, drawDecks: decks })
-      return { ...state, activeCard: card, currentTurnPhase: 'action', drawDecks: decks }
+      const scaled = scaleDoodadToPlayer(card, player)
+      return { ...state, activeCard: scaled, currentTurnPhase: 'action', drawDecks: decks }
     }
 
     case 'market': {
@@ -321,6 +335,7 @@ export const useGameStore = create<GameStore>()(
         marketOffer: null,
         dreamMarkers: {},
         lastDiceRoll: null,
+        doodadNegotiated: false,
         winnerId: null,
         failureReason: null,
         createdAt: new Date().toISOString(),
@@ -355,7 +370,8 @@ export const useGameStore = create<GameStore>()(
           set({ game: fresh({ ...skipped, currentPlayerIndex: next, round: next === 0 ? skipped.round + 1 : skipped.round, turn: skipped.turn + 1, currentTurnPhase: 'idle', lastDiceRoll: null }) })
           return
         }
-        const roll = rollDice(diceCountFor(player))
+        const roll = _debugDiceOverride ?? rollDice(diceCountFor(player))
+        _debugDiceOverride = null
         set({ game: fresh({ ...game, currentTurnPhase: 'rolling', lastDiceRoll: roll }) })
         return
       }
@@ -395,7 +411,12 @@ export const useGameStore = create<GameStore>()(
         let state = { ...game }
         // Evaluate anchors + ESBI quadrant (custom layer) for the player who just acted.
         let acted = evaluateAnchors(state.players[idx], state.turn)
+        const prevQuadrant = acted.quadrant
         acted = evaluateQuadrant(acted)
+        // Quadrant advance: reset time to the new quadrant's base (systems = more freedom).
+        if (acted.quadrant !== prevQuadrant) {
+          acted = { ...acted, freeTimeUnits: TIME_BASE[acted.quadrant], timeCapacity: TIME_CAPACITY[acted.quadrant] }
+        }
         // Charity's extra die counts down each Rat Race turn.
         if (acted.extraDiceTurns > 0 && acted.boardTrack === 'rat_race') {
           acted = { ...acted, extraDiceTurns: acted.extraDiceTurns - 1 }
@@ -647,7 +668,55 @@ export const useGameStore = create<GameStore>()(
       set({ game: fresh(endCheck(state)) })
     },
 
+    negotiateDoodad: () => {
+      const { game } = get()
+      if (!game || game.currentTurnPhase !== 'action') return
+      if (!game.activeCard || game.activeCard.type !== 'doodad') return
+      if (game.doodadNegotiated) return
+      const idx = game.currentPlayerIndex
+      const player = game.players[idx]
+      if (player.freeTimeUnits < DOODAD_NEGOTIATE_COST) return
+
+      // Halve every cash_loss effect on the card (ceiling so odd values round up).
+      const halved = {
+        ...game.activeCard,
+        effects: game.activeCard.effects.map((e) =>
+          e.type === 'cash_loss' ? { ...e, amount: Math.ceil(e.amount / 2) } : e,
+        ),
+      }
+      const updated: PlayerState = { ...player, freeTimeUnits: player.freeTimeUnits - DOODAD_NEGOTIATE_COST }
+      set({ game: fresh(setPlayer({ ...game, activeCard: halved, doodadNegotiated: true }, idx, updated)) })
+    },
+
     resetGame: () => set({ game: null }),
+
+    debugSetDice: (values) => {
+      if (!import.meta.env.DEV) return
+      _debugDiceOverride = values
+    },
+
+    debugGiveMoney: (amount) => {
+      if (!import.meta.env.DEV) return
+      const { game } = get()
+      if (!game) return
+      const idx = game.currentPlayerIndex
+      const player = game.players[idx]
+      const updated = { ...player, finances: { ...player.finances, cashBalance: player.finances.cashBalance + amount } }
+      set({ game: fresh(setPlayer(game, idx, updated)) })
+    },
+
+    debugForceTrack: (track) => {
+      if (!import.meta.env.DEV) return
+      const { game } = get()
+      if (!game) return
+      const idx = game.currentPlayerIndex
+      const player = game.players[idx]
+      if (track === 'fast_track') {
+        set({ game: fresh(setPlayer(game, idx, enterFastTrack(game, idx))) })
+      } else {
+        set({ game: fresh(setPlayer(game, idx, { ...player, boardTrack: 'rat_race', boardPosition: 0 })) })
+      }
+    },
   })),
 )
 

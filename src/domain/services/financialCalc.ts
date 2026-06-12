@@ -3,11 +3,13 @@ import type {
   FinancialSummary,
   PlayerState,
   CardEffect,
+  Card,
   Asset,
   IncomeSource,
   ExpenseLine,
   Liability,
 } from '../entities/types'
+import { formatCurrency } from '../../utils/currency'
 
 export function computeSummary(fin: FinancialStatement): FinancialSummary {
   const totalMonthlyIncome = fin.incomeSources.reduce((s, i) => s + i.monthlyAmount, 0)
@@ -297,4 +299,34 @@ export function applyPayday(player: PlayerState): PlayerState {
   const summary = computeSummary(player.finances)
   const cash = player.finances.cashBalance + summary.monthlyCashFlow
   return { ...player, finances: { ...player.finances, cashBalance: cash } }
+}
+
+/**
+ * Scale a doodad card's cash_loss (and any paired add_expense) to the player's
+ * income level. Cap = 50 % of monthly salary so low-income players aren't wiped
+ * out by a single mandatory card — a high-income player still pays full price.
+ *
+ * The card description is annotated so the player sees the actual amount.
+ */
+export function scaleDoodadToPlayer(card: Card, player: PlayerState): Card {
+  const salary = player.finances.incomeSources
+    .filter((s) => !s.isPassive)
+    .reduce((sum, s) => sum + s.monthlyAmount, 0)
+  if (salary <= 0) return card
+
+  const cap = salary * 0.5
+  const lossEffect = card.effects.find((e) => e.type === 'cash_loss') as { type: 'cash_loss'; amount: number } | undefined
+  if (!lossEffect || lossEffect.amount <= cap) return card
+
+  // Scale factor: how much of the original amount we keep.
+  const factor = cap / lossEffect.amount
+
+  const scaledEffects = card.effects.map((e) => {
+    if (e.type === 'cash_loss') return { ...e, amount: Math.round(cap) }
+    if (e.type === 'add_expense') return { ...e, monthlyAmount: Math.round(e.monthlyAmount * factor) }
+    return e
+  })
+
+  const note = ` (adjusted to ${formatCurrency(Math.round(cap))} for your income level)`
+  return { ...card, effects: scaledEffects, description: card.description + note }
 }

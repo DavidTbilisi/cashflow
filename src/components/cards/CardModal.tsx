@@ -3,8 +3,10 @@ import type { Card } from '../../domain/entities/types'
 import { useGameStore } from '../../store/gameStore'
 import { useUIStore } from '../../store/uiStore'
 import { computeSummary } from '../../domain/services/financialCalc'
+import { DOODAD_NEGOTIATE_COST } from '../../domain/services/timeService'
 import { formatCurrency } from '../../utils/currency'
 import { valueColor } from '../../utils/colors'
+import { KbdHint } from '../ui/KbdHint'
 
 const TYPE_META: Record<string, { color: string; label: string }> = {
   small_deal:          { color: '#5B8FF9', label: 'Small Deal' },
@@ -27,10 +29,16 @@ interface Props { card: Card }
 export function CardModal({ card }: Props) {
   const resolveCard = useGameStore((s) => s.resolveCard)
   const borrowAndBuy = useGameStore((s) => s.borrowAndBuy)
-  const finances = useGameStore((s) => s.game ? s.game.players[s.game.currentPlayerIndex].finances : null)
+  const negotiateDoodad = useGameStore((s) => s.negotiateDoodad)
+  const player = useGameStore((s) => s.game ? s.game.players[s.game.currentPlayerIndex] : null)
+  const doodadNegotiated = useGameStore((s) => s.game?.doodadNegotiated ?? false)
+  const finances = player?.finances ?? null
   const cash = finances?.cashBalance ?? 0
   const openModal = useUIStore((s) => s.openModal)
   const meta = TYPE_META[card.type] ?? { color: '#8090A8', label: card.type }
+
+  const isDoodad = card.type === 'doodad'
+  const canNegotiate = isDoodad && !doodadNegotiated && (player?.freeTimeUnits ?? 0) >= DOODAD_NEGOTIATE_COST
 
   // Deals show a down payment; you can't accept what you can't afford.
   const dealEffect = card.effects.find((e) => e.type === 'acquire_asset')
@@ -184,6 +192,38 @@ export function CardModal({ card }: Props) {
               </div>
             )}
 
+            {isDoodad && (
+              <div className="mb-3 px-3 py-2" style={{ background: 'rgba(120,180,100,0.07)', border: '1px solid rgba(120,180,100,0.22)', borderRadius: '3px' }}>
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px]" style={{ color: 'var(--color-fog)' }}>
+                    {doodadNegotiated ? '✓ Negotiated — expense halved' : `Negotiate: spend ${DOODAD_NEGOTIATE_COST}h free time to halve this expense`}
+                  </span>
+                  {!doodadNegotiated && (
+                    <button
+                      onClick={negotiateDoodad}
+                      disabled={!canNegotiate}
+                      className="ml-3 px-2.5 py-1 text-[11px] font-semibold transition-opacity"
+                      style={{
+                        background: canNegotiate ? 'rgba(120,180,100,0.25)' : 'var(--color-rim)',
+                        color: canNegotiate ? '#8fc472' : 'var(--color-fog)',
+                        border: `1px solid ${canNegotiate ? '#8fc47244' : 'transparent'}`,
+                        borderRadius: '2px',
+                        cursor: canNegotiate ? 'pointer' : 'not-allowed',
+                        flexShrink: 0,
+                      }}
+                    >
+                      {canNegotiate ? `−${DOODAD_NEGOTIATE_COST}h` : `Need ${DOODAD_NEGOTIATE_COST}h`}
+                    </button>
+                  )}
+                </div>
+                {!canNegotiate && !doodadNegotiated && (
+                  <p className="text-[10px] mt-1" style={{ color: 'var(--color-fog)' }}>
+                    You have {player?.freeTimeUnits ?? 0}h free time. Advance your quadrant to unlock more.
+                  </p>
+                )}
+              </div>
+            )}
+
             <div className="flex gap-2 mt-2">
               {canDecline && (
                 <button
@@ -199,7 +239,7 @@ export function CardModal({ card }: Props) {
                   onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--color-rim)' }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
                 >
-                  Pass
+                  Pass<KbdHint k="Esc" />
                 </button>
               )}
               {unaffordable ? (
@@ -214,7 +254,7 @@ export function CardModal({ card }: Props) {
                     cursor: 'pointer',
                   }}
                 >
-                  Borrow {formatCurrency(borrowAmount)} & Buy
+                  Borrow {formatCurrency(borrowAmount)} & Buy<KbdHint k="↵" />
                 </button>
               ) : (
                 <button
@@ -228,7 +268,7 @@ export function CardModal({ card }: Props) {
                     cursor: 'pointer',
                   }}
                 >
-                  {canDecline ? 'Accept' : 'Continue'}
+                  {canDecline ? 'Accept' : 'Continue'}<KbdHint k="↵" />
                 </button>
               )}
             </div>

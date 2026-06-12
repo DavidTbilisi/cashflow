@@ -11,6 +11,7 @@ import { OpponentsStrip } from '../components/players/OpponentsStrip'
 import { useGameStore } from '../store/gameStore'
 import { useUIStore } from '../store/uiStore'
 import { useGameSounds } from '../hooks/useGameSounds'
+import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
 
 export function GameScreen() {
   const phase = useGameStore((s) => s.game?.currentTurnPhase)
@@ -27,6 +28,7 @@ export function GameScreen() {
   const showCard = !!activeCard && !showMarket && !showPurchase && !necstOpen
 
   useGameSounds()
+  useKeyboardShortcuts()
 
   const player = game ? game.players[game.currentPlayerIndex] : null
   const history = game && player ? (game.history[player.id] ?? []) : []

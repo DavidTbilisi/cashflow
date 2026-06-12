@@ -1,10 +1,12 @@
 import { useGameStore } from '../../store/gameStore'
 import { ESBIIndicator } from '../progress/ESBIIndicator'
 import { PassiveIncomeGauge } from '../financial/PassiveIncomeGauge'
+import { TimeGauge } from '../financial/TimeGauge'
 import { computeSummary } from '../../domain/services/financialCalc'
 import { canEnterFastTrack } from '../../domain/rules/winRules'
 import { formatCurrency } from '../../utils/currency'
 import { InfoLabel, TERM_INFO, type ConceptInfo } from '../ui/conceptInfo'
+import { KbdHint } from '../ui/KbdHint'
 
 export function PlayerPanel() {
   const game = useGameStore((s) => s.game)
@@ -94,6 +96,10 @@ export function PlayerPanel() {
         <PassiveIncomeGauge player={player} />
       </div>
 
+      <div className="pt-1" style={{ borderTop: '1px solid var(--color-rim)' }}>
+        <TimeGauge player={player} />
+      </div>
+
       {onFastTrack && (
         <div className="space-y-1.5 pt-2" style={{ borderTop: '1px solid var(--color-rim)' }}>
           <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--color-fog)' }}>
@@ -120,7 +126,7 @@ export function PlayerPanel() {
             className="w-full py-2 font-semibold text-xs tracking-[0.12em] uppercase transition-all active:scale-[0.98]"
             style={{ background: 'var(--color-gold)', color: 'var(--color-ink)', borderRadius: '3px', border: 'none', cursor: 'pointer' }}
           >
-            Move to Fast Track →
+            Move to Fast Track →<KbdHint k="F" />
           </button>
         )}
 
@@ -137,7 +143,7 @@ export function PlayerPanel() {
               cursor: 'pointer',
             }}
           >
-            {`Move Pawn (${steps}) →`}
+            {`Move Pawn (${steps}) →`}<KbdHint k="Space" />
           </button>
         ) : canRoll && onFastTrack && player.fastTrackDiceChoice && !mustSkip ? (
           // Fast Track Charity perk: choose 1, 2, or 3 dice this turn.
@@ -173,6 +179,7 @@ export function PlayerPanel() {
             }}
           >
             {mustSkip ? `Lose Turn (${player.skipTurns})` : onFastTrack || player.extraDiceTurns > 0 ? 'Roll 2 Dice' : 'Roll Die'}
+            {canRoll && <KbdHint k="Space" />}
           </button>
         )}
 
@@ -188,7 +195,7 @@ export function PlayerPanel() {
             background: 'transparent',
           }}
         >
-          End Turn
+          End Turn{canEndTurn && <KbdHint k="↵" />}
         </button>
       </div>
     </div>

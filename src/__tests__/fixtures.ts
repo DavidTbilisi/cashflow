@@ -55,6 +55,8 @@ export function makePlayer(overrides: Partial<PlayerState> = {}): PlayerState {
     cashflowDayGoal: 0,
     businessesOwned: [],
     dreamsOwned: [],
+    freeTimeUnits: 5,
+    timeCapacity: 10,
     ...overrides,
   }
 }
@@ -77,6 +79,7 @@ export function makeGame(playerOverrides: Partial<PlayerState> = {}, seed = 42):
     marketOffer: null,
     dreamMarkers: {},
     lastDiceRoll: null,
+    doodadNegotiated: false,
     winnerId: null,
     failureReason: null,
     createdAt: '2026-01-01T00:00:00.000Z',

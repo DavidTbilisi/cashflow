@@ -60,7 +60,7 @@ export function LobbyScreen({ onStart }: Props) {
         </h2>
       </div>
 
-      <div className="flex flex-col gap-2 w-full max-w-md">
+      <div className="flex flex-col gap-2 w-full max-w-xl">
         {players.map((p, i) => (
           <div
             key={i}
@@ -162,7 +162,7 @@ export function LobbyScreen({ onStart }: Props) {
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-2 w-full max-w-md">
+      <div className="grid grid-cols-2 gap-2 w-full max-w-xl">
         {STARTING_PROFILES.map((pr) => (
           <div
             key={pr.label}

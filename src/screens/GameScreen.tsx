@@ -10,6 +10,7 @@ import { ChartsDashboard } from '../components/charts/ChartsDashboard'
 import { OpponentsStrip } from '../components/players/OpponentsStrip'
 import { useGameStore } from '../store/gameStore'
 import { useUIStore } from '../store/uiStore'
+import { useGameSounds } from '../hooks/useGameSounds'
 
 export function GameScreen() {
   const phase = useGameStore((s) => s.game?.currentTurnPhase)
@@ -24,6 +25,8 @@ export function GameScreen() {
   const showMarket = phase === 'market_prompt'
   const showPurchase = !!pendingPurchase && !showMarket
   const showCard = !!activeCard && !showMarket && !showPurchase && !necstOpen
+
+  useGameSounds()
 
   const player = game ? game.players[game.currentPlayerIndex] : null
   const history = game && player ? (game.history[player.id] ?? []) : []

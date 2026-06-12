@@ -29,26 +29,32 @@ function play(fn: (c: AudioContext, now: number) => void) {
 
 export function soundRoll() {
   play((c, t) => {
-    // 4 quick percussive clicks — tumble then settle
-    const offsets = [0, 0.04, 0.1, 0.19]
-    const vols    = [0.22, 0.18, 0.14, 0.28]  // last hit loudest (landing)
-    offsets.forEach((dt, i) => {
-      const len = Math.floor(c.sampleRate * 0.022)
+    // two soft wooden taps
+    ;[0, 0.07].forEach((dt, i) => {
+      const len = Math.floor(c.sampleRate * 0.018)
       const buf = c.createBuffer(1, len, c.sampleRate)
       const data = buf.getChannelData(0)
-      for (let s = 0; s < len; s++) data[s] = (Math.random() * 2 - 1) * Math.exp(-s / (len * 0.25))
+      for (let s = 0; s < len; s++) data[s] = (Math.random() * 2 - 1) * Math.exp(-s / (len * 0.18))
       const src = c.createBufferSource()
       src.buffer = buf
-      const hp = c.createBiquadFilter()
-      hp.type = 'highpass'
-      hp.frequency.value = 1800
+      const bp = c.createBiquadFilter()
+      bp.type = 'bandpass'
+      bp.frequency.value = 500
+      bp.Q.value = 1.2
       const g = c.createGain()
-      g.gain.value = vols[i]
-      src.connect(hp)
-      hp.connect(g)
-      g.connect(c.destination)
+      g.gain.value = i === 0 ? 0.12 : 0.09
+      src.connect(bp); bp.connect(g); g.connect(c.destination)
       src.start(t + dt)
     })
+    // delicate "tink" at the end
+    const g = c.createGain()
+    g.connect(c.destination)
+    const o = osc(c, 'sine', 1320, g)
+    g.gain.setValueAtTime(0, t + 0.14)
+    g.gain.linearRampToValueAtTime(0.13, t + 0.15)
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.38)
+    o.start(t + 0.14)
+    o.stop(t + 0.38)
   })
 }
 

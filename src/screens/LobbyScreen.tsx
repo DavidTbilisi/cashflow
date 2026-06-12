@@ -116,7 +116,7 @@ export function LobbyScreen({ onStart }: Props) {
                 border: '1px solid var(--color-rim)',
                 borderRadius: '3px',
                 fontFamily: 'var(--font-ui)',
-              width: '120px',
+              width: '150px',
               flexShrink: 0,
             }}
             >

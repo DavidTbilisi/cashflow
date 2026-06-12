@@ -116,7 +116,6 @@ export function LobbyScreen({ onStart }: Props) {
                 border: '1px solid var(--color-rim)',
                 borderRadius: '3px',
                 fontFamily: 'var(--font-ui)',
-                maxWidth: '92px',
               }}
             >
               {DREAMS.map((d) => (

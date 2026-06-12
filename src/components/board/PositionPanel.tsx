@@ -6,7 +6,7 @@ import type { SpaceType } from '../../domain/entities/types'
 const SPACE_EMOJI: Record<SpaceType, string> = {
   payday: '💰',
   opportunity: '🎯',
-  doodad: '🛍️',
+  doodad: '💸',
   market: '📈',
   baby: '👶',
   charity: '❤️',

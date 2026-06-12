@@ -12,7 +12,7 @@ const TYPE_META: Record<string, { color: string; label: string }> = {
   small_deal:          { color: '#5B8FF9', label: 'Small Deal' },
   big_deal:            { color: '#C8963C', label: 'Big Deal' },
   market:              { color: '#2DD4BF', label: 'The Market' },
-  doodad:              { color: '#F0A050', label: 'Doodad' },
+  doodad:              { color: '#F0A050', label: 'Lifestyle' },
   event:               { color: '#8090A8', label: 'Event' },
   income:              { color: '#2DD4BF', label: 'Income' },
   expense_liability:   { color: '#F06070', label: 'Expense' },
@@ -21,6 +21,9 @@ const TYPE_META: Record<string, { color: string; label: string }> = {
   decision_temptation: { color: '#F0A050', label: 'Decision' },
   obstacle_challenge:  { color: '#F06070', label: 'Obstacle' },
 }
+
+const LIFESTYLE_NEED_COLOR = '#F06070'
+const LIFESTYLE_WANT_COLOR = '#F0A050'
 
 const DECLINABLE = new Set(['asset_acquisition', 'decision_temptation', 'small_deal', 'big_deal'])
 
@@ -38,7 +41,9 @@ export function CardModal({ card }: Props) {
   const meta = TYPE_META[card.type] ?? { color: '#8090A8', label: card.type }
 
   const isDoodad = card.type === 'doodad'
-  const canNegotiate = isDoodad && !doodadNegotiated && (player?.freeTimeUnits ?? 0) >= DOODAD_NEGOTIATE_COST
+  const isWant = isDoodad && card.lifestyleCategory === 'want'
+  const isNeed = isDoodad && card.lifestyleCategory === 'need'
+  const canNegotiate = isWant && !doodadNegotiated && (player?.freeTimeUnits ?? 0) >= DOODAD_NEGOTIATE_COST
 
   // Deals show a down payment; you can't accept what you can't afford.
   const dealEffect = card.effects.find((e) => e.type === 'acquire_asset')
@@ -71,7 +76,7 @@ export function CardModal({ card }: Props) {
   }
   const handleBorrowAndBuy = () => borrowAndBuy(card)
   const handleDecline = () => resolveCard(card, false)
-  const canDecline = DECLINABLE.has(card.type)
+  const canDecline = DECLINABLE.has(card.type) || isWant
 
   return (
     <AnimatePresence>
@@ -93,21 +98,26 @@ export function CardModal({ card }: Props) {
           animate={{ scale: 1, y: 0, rotateX: 0 }}
           transition={{ type: 'spring', stiffness: 380, damping: 28 }}
         >
-          <div className="h-0.5" style={{ background: meta.color }} />
+          <div className="h-0.5" style={{ background: isNeed ? LIFESTYLE_NEED_COLOR : isWant ? LIFESTYLE_WANT_COLOR : meta.color }} />
 
           <div className="p-6">
-            <div className="mb-4">
+            <div className="mb-4 flex items-center gap-2">
               <span
                 className="text-[10px] font-bold tracking-[0.22em] uppercase px-2 py-1"
                 style={{
-                  background: meta.color + '1A',
-                  color: meta.color,
-                  border: `1px solid ${meta.color}44`,
+                  background: (isNeed ? LIFESTYLE_NEED_COLOR : isWant ? LIFESTYLE_WANT_COLOR : meta.color) + '1A',
+                  color: isNeed ? LIFESTYLE_NEED_COLOR : isWant ? LIFESTYLE_WANT_COLOR : meta.color,
+                  border: `1px solid ${(isNeed ? LIFESTYLE_NEED_COLOR : isWant ? LIFESTYLE_WANT_COLOR : meta.color)}44`,
                   borderRadius: '2px',
                 }}
               >
-                {meta.label}
+                {isNeed ? 'Lifestyle · Need' : isWant ? 'Lifestyle · Want' : meta.label}
               </span>
+              {isDoodad && (
+                <span className="text-[9px] uppercase tracking-widest" style={{ color: 'var(--color-fog)' }}>
+                  {isNeed ? 'mandatory' : 'optional'}
+                </span>
+              )}
             </div>
 
             <h2
@@ -192,11 +202,11 @@ export function CardModal({ card }: Props) {
               </div>
             )}
 
-            {isDoodad && (
+            {isWant && (
               <div className="mb-3 px-3 py-2" style={{ background: 'rgba(120,180,100,0.07)', border: '1px solid rgba(120,180,100,0.22)', borderRadius: '3px' }}>
                 <div className="flex items-center justify-between">
                   <span className="text-[11px]" style={{ color: 'var(--color-fog)' }}>
-                    {doodadNegotiated ? '✓ Negotiated — expense halved' : `Negotiate: spend ${DOODAD_NEGOTIATE_COST}h free time to halve this expense`}
+                    {doodadNegotiated ? '✓ Negotiated — expense halved' : `Negotiate: spend ${DOODAD_NEGOTIATE_COST}h free time to halve this Want`}
                   </span>
                   {!doodadNegotiated && (
                     <button
@@ -239,7 +249,7 @@ export function CardModal({ card }: Props) {
                   onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--color-rim)' }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
                 >
-                  Pass<KbdHint k="Esc" />
+                  {isWant ? 'Skip · Save it' : 'Pass'}<KbdHint k="Esc" />
                 </button>
               )}
               {unaffordable ? (
@@ -268,7 +278,7 @@ export function CardModal({ card }: Props) {
                     cursor: 'pointer',
                   }}
                 >
-                  {canDecline ? 'Accept' : 'Continue'}<KbdHint k="↵" />
+                  {isWant ? 'Spend It' : canDecline ? 'Accept' : 'Continue'}<KbdHint k="↵" />
                 </button>
               )}
             </div>

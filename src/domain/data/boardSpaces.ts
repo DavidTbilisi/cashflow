@@ -6,7 +6,7 @@ const FAST_TRACK_COUNT = 24
 
 // ── Rat Race plan ───────────────────────────────────────────────────────────
 // Pay Check ×4, the custom Six-Anchor milestones, one Fast Track entry, and the
-// rulebook spaces (Opportunity, The Market, Doodad, Charity, Baby ×3, Downsized)
+// rulebook spaces (Opportunity, The Market, Expense, Charity, Baby ×3, Downsized)
 // plus a few custom card-draw tiles (Anchors / ESBI / NECST layer).
 const RR_PAYDAY = new Set([0, 10, 20, 30])
 const RR_ANCHORS: Record<number, BoardSpace['anchorId']> = {
@@ -14,7 +14,7 @@ const RR_ANCHORS: Record<number, BoardSpace['anchorId']> = {
 }
 const RR_PLAN: Record<number, { type: SpaceType; label: string; deck?: CardType }> = {
   1: { type: 'opportunity', label: 'Opportunity' },
-  2: { type: 'doodad', label: 'Doodad' },
+  2: { type: 'doodad', label: 'Expense' },
   3: { type: 'opportunity', label: 'Opportunity' },
   5: { type: 'opportunity', label: 'Opportunity' },
   6: { type: 'market', label: 'The Market' },
@@ -22,26 +22,26 @@ const RR_PLAN: Record<number, { type: SpaceType; label: string; deck?: CardType 
   9: { type: 'baby', label: 'Baby' },
   11: { type: 'charity', label: 'Charity' },
   12: { type: 'opportunity', label: 'Opportunity' },
-  13: { type: 'doodad', label: 'Doodad' },
-  15: { type: 'doodad', label: 'Doodad' },
+  13: { type: 'doodad', label: 'Expense' },
+  15: { type: 'doodad', label: 'Expense' },
   16: { type: 'opportunity', label: 'Opportunity' },
   17: { type: 'market', label: 'The Market' },
   19: { type: 'baby', label: 'Baby' },
   21: { type: 'card_draw', label: 'Decision', deck: 'decision_temptation' },
   22: { type: 'opportunity', label: 'Opportunity' },
-  23: { type: 'doodad', label: 'Doodad' },
+  23: { type: 'doodad', label: 'Expense' },
   25: { type: 'opportunity', label: 'Opportunity' },
   26: { type: 'opportunity', label: 'Opportunity' },
   27: { type: 'market', label: 'The Market' },
   29: { type: 'card_draw', label: 'Build', deck: 'system_building' },
   31: { type: 'downsized', label: 'Downsized' },
   32: { type: 'baby', label: 'Baby' },
-  33: { type: 'doodad', label: 'Doodad' },
+  33: { type: 'doodad', label: 'Expense' },
   34: { type: 'charity', label: 'Charity' },
-  35: { type: 'doodad', label: 'Doodad' },
+  35: { type: 'doodad', label: 'Expense' },
   37: { type: 'card_draw', label: 'Obstacle', deck: 'obstacle_challenge' },
   38: { type: 'opportunity', label: 'Opportunity' },
-  39: { type: 'doodad', label: 'Doodad' },
+  39: { type: 'doodad', label: 'Expense' },
 }
 
 export const RAT_RACE_SPACES: BoardSpace[] = Array.from({ length: RAT_RACE_COUNT }, (_, i) => {

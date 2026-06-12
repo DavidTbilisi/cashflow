@@ -672,6 +672,7 @@ export const useGameStore = create<GameStore>()(
       const { game } = get()
       if (!game || game.currentTurnPhase !== 'action') return
       if (!game.activeCard || game.activeCard.type !== 'doodad') return
+      if (game.activeCard.lifestyleCategory !== 'want') return
       if (game.doodadNegotiated) return
       const idx = game.currentPlayerIndex
       const player = game.players[idx]

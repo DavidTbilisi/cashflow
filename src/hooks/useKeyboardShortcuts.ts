@@ -97,14 +97,14 @@ export function useKeyboardShortcuts() {
       }
 
       if (showCard && activeCard) {
-        const isDoodad = activeCard.type === 'doodad'
+        const isWant = activeCard.type === 'doodad' && activeCard.lifestyleCategory === 'want'
         const dealEffect = activeCard.effects.find((ef) => ef.type === 'acquire_asset')
         const downPayment = dealEffect?.type === 'acquire_asset'
           ? dealEffect.asset.purchasePrice - dealEffect.asset.liabilityAmount
           : 0
         const unaffordable = downPayment > 0 && player.finances.cashBalance < downPayment
-        const canDecline = ['asset_acquisition', 'decision_temptation', 'small_deal', 'big_deal'].includes(activeCard.type)
-        const canNegotiate = isDoodad && !game.doodadNegotiated && (player.freeTimeUnits ?? 0) >= DOODAD_NEGOTIATE_COST
+        const canDecline = ['asset_acquisition', 'decision_temptation', 'small_deal', 'big_deal'].includes(activeCard.type) || isWant
+        const canNegotiate = isWant && !game.doodadNegotiated && (player.freeTimeUnits ?? 0) >= DOODAD_NEGOTIATE_COST
 
         if (key === 'Enter') {
           e.preventDefault()

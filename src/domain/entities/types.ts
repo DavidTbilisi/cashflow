@@ -281,6 +281,8 @@ export interface Card {
   necstPassThreshold?: number
   effects: CardEffect[]
   lesson?: string
+  /** Lifestyle expense sub-category: 'need' = mandatory (no decline); 'want' = discretionary (can be passed). */
+  lifestyleCategory?: 'need' | 'want'
 }
 
 // ── Game ──────────────────────────────────────────────────────────────────

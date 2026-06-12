@@ -29,19 +29,26 @@ function play(fn: (c: AudioContext, now: number) => void) {
 
 export function soundRoll() {
   play((c, t) => {
-    const buf = c.createBuffer(1, c.sampleRate * 0.06, c.sampleRate)
-    const data = buf.getChannelData(0)
-    for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / data.length)
-    const src = c.createBufferSource()
-    src.buffer = buf
-    const f = c.createBiquadFilter()
-    f.type = 'bandpass'
-    f.frequency.value = 800
-    f.Q.value = 0.5
-    src.connect(f)
-    const g = gain(c, 0.35)
-    f.connect(g)
-    src.start(t)
+    // 4 quick percussive clicks — tumble then settle
+    const offsets = [0, 0.04, 0.1, 0.19]
+    const vols    = [0.22, 0.18, 0.14, 0.28]  // last hit loudest (landing)
+    offsets.forEach((dt, i) => {
+      const len = Math.floor(c.sampleRate * 0.022)
+      const buf = c.createBuffer(1, len, c.sampleRate)
+      const data = buf.getChannelData(0)
+      for (let s = 0; s < len; s++) data[s] = (Math.random() * 2 - 1) * Math.exp(-s / (len * 0.25))
+      const src = c.createBufferSource()
+      src.buffer = buf
+      const hp = c.createBiquadFilter()
+      hp.type = 'highpass'
+      hp.frequency.value = 1800
+      const g = c.createGain()
+      g.gain.value = vols[i]
+      src.connect(hp)
+      hp.connect(g)
+      g.connect(c.destination)
+      src.start(t + dt)
+    })
   })
 }
 

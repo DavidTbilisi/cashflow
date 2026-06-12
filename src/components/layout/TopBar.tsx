@@ -77,17 +77,6 @@ export function TopBar() {
           </span>
         </span>
 
-        <span
-          className="px-2 py-0.5 text-[11px] font-semibold tracking-wider uppercase"
-          style={{
-            background: phase.color + '22',
-            color: phase.color,
-            border: `1px solid ${phase.color}44`,
-            borderRadius: '2px',
-          }}
-        >
-          {phase.label}
-        </span>
       </div>
     </div>
   )

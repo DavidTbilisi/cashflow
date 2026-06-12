@@ -4,12 +4,6 @@ import { ESBIIndicator } from '../progress/ESBIIndicator'
 import { formatShort } from '../../utils/currency'
 import { InfoLabel, TERM_INFO } from '../ui/conceptInfo'
 
-const PHASE_META: Record<string, { color: string; label: string }> = {
-  idle:      { color: '#9A9A9A', label: 'Ready' },
-  rolling:   { color: '#CFCFCF', label: 'Rolling' },
-  action:    { color: '#CFCFCF', label: 'Action' },
-  end_check: { color: '#9A9A9A', label: 'End Turn' },
-}
 
 export function TopBar() {
   const game = useGameStore((s) => s.game)
@@ -17,8 +11,6 @@ export function TopBar() {
 
   const current = game.players[game.currentPlayerIndex]
   const summary = computeSummary(current.finances)
-  const phase = PHASE_META[game.currentTurnPhase] ?? { color: '#8090A8', label: game.currentTurnPhase }
-
   return (
     <div
       className="h-12 flex items-center px-4 gap-4 flex-shrink-0"

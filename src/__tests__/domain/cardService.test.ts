@@ -64,7 +64,7 @@ describe('drawCard', () => {
       { id: 'c3', type: 'income', title: 'Card 3', description: '', effects: [] },
     ]
     const { card, deck: remaining } = drawCard(deck, [])
-    expect(card.id).toBe('c1')
+    expect(card!.id).toBe('c1')
     expect(remaining).toHaveLength(2)
     expect(remaining.map((c) => c.id)).toEqual(['c2', 'c3'])
   })
@@ -85,7 +85,7 @@ describe('drawCard', () => {
     ]
     const { card, deck: remaining } = drawCard([], discard)
     expect(card).toBeDefined()
-    expect(['d1', 'd2']).toContain(card.id)
+    expect(['d1', 'd2']).toContain(card!.id)
     expect(remaining).toHaveLength(1)
   })
 
@@ -95,7 +95,7 @@ describe('drawCard', () => {
       { id: 'c2', type: 'income', title: 'Card 2', description: '', effects: [] },
     ]
     const { card, deck: remaining } = drawCard(deck, [])
-    expect(remaining.find((c) => c.id === card.id)).toBeUndefined()
+    expect(remaining.find((c) => c.id === card!.id)).toBeUndefined()
   })
 
   it('single card deck returns that card with empty remaining', () => {
@@ -103,7 +103,7 @@ describe('drawCard', () => {
       { id: 'only', type: 'income', title: 'Only Card', description: '', effects: [] },
     ]
     const { card, deck: remaining } = drawCard(deck, [])
-    expect(card.id).toBe('only')
+    expect(card!.id).toBe('only')
     expect(remaining).toHaveLength(0)
   })
 })

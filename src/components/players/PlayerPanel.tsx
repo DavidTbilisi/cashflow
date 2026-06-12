@@ -7,6 +7,7 @@ import { canEnterFastTrack } from '../../domain/rules/winRules'
 import { formatCurrency } from '../../utils/currency'
 import { InfoLabel, TERM_INFO, type ConceptInfo } from '../ui/conceptInfo'
 import { KbdHint } from '../ui/KbdHint'
+import { useShortcutBadge } from '../../hooks/useGameShortcuts'
 
 export function PlayerPanel() {
   const game = useGameStore((s) => s.game)
@@ -27,6 +28,10 @@ export function PlayerPanel() {
   const mustSkip = player.skipTurns > 0
   const canPromote = idle && canEnterFastTrack(player)
   const steps = (game.lastDiceRoll ?? []).reduce((a, b) => a + b, 0)
+
+  // Badges come from the shortcut registry — they appear only when the key is live.
+  const primaryBadge = useShortcutBadge('primary')
+  const fastTrackBadge = useShortcutBadge('fastTrack')
 
   return (
     <div
@@ -126,7 +131,7 @@ export function PlayerPanel() {
             className="w-full py-2 font-semibold text-xs tracking-[0.12em] uppercase transition-all active:scale-[0.98]"
             style={{ background: 'var(--color-gold)', color: 'var(--color-ink)', borderRadius: '3px', border: 'none', cursor: 'pointer' }}
           >
-            Move to Fast Track →<KbdHint k="F" />
+            Move to Fast Track →{fastTrackBadge && <KbdHint k={fastTrackBadge} />}
           </button>
         )}
 
@@ -143,7 +148,7 @@ export function PlayerPanel() {
               cursor: 'pointer',
             }}
           >
-            {`Move Pawn (${steps}) →`}<KbdHint k="Space" />
+            {`Move Pawn (${steps}) →`}{primaryBadge && <KbdHint k={primaryBadge} />}
           </button>
         ) : canRoll && onFastTrack && player.fastTrackDiceChoice && !mustSkip ? (
           // Fast Track Charity perk: choose 1, 2, or 3 dice this turn.
@@ -179,7 +184,7 @@ export function PlayerPanel() {
             }}
           >
             {mustSkip ? `Lose Turn (${player.skipTurns})` : onFastTrack || player.extraDiceTurns > 0 ? 'Roll 2 Dice' : 'Roll Die'}
-            {canRoll && <KbdHint k="Space" />}
+            {canRoll && primaryBadge && <KbdHint k={primaryBadge} />}
           </button>
         )}
 
@@ -195,7 +200,7 @@ export function PlayerPanel() {
             background: 'transparent',
           }}
         >
-          End Turn{canEndTurn && <KbdHint k="↵" />}
+          End Turn{canEndTurn && primaryBadge && <KbdHint k={primaryBadge} />}
         </button>
       </div>
     </div>

@@ -7,6 +7,7 @@ import { DOODAD_NEGOTIATE_COST } from '../../domain/services/timeService'
 import { formatCurrency } from '../../utils/currency'
 import { valueColor } from '../../utils/colors'
 import { KbdHint } from '../ui/KbdHint'
+import { useShortcutBadge } from '../../hooks/useGameShortcuts'
 
 const TYPE_META: Record<string, { color: string; label: string }> = {
   small_deal:          { color: '#5B8FF9', label: 'Small Deal' },
@@ -38,6 +39,9 @@ export function CardModal({ card }: Props) {
   const finances = player?.finances ?? null
   const cash = finances?.cashBalance ?? 0
   const openModal = useUIStore((s) => s.openModal)
+  const primaryBadge = useShortcutBadge('primary')
+  const dismissBadge = useShortcutBadge('dismiss')
+  const negotiateBadge = useShortcutBadge('negotiate')
   const meta = TYPE_META[card.type] ?? { color: '#8090A8', label: card.type }
 
   const isDoodad = card.type === 'doodad'
@@ -222,7 +226,7 @@ export function CardModal({ card }: Props) {
                         flexShrink: 0,
                       }}
                     >
-                      {canNegotiate ? `−${DOODAD_NEGOTIATE_COST}h` : `Need ${DOODAD_NEGOTIATE_COST}h`}
+                      {canNegotiate ? `−${DOODAD_NEGOTIATE_COST}h` : `Need ${DOODAD_NEGOTIATE_COST}h`}{negotiateBadge && <KbdHint k={negotiateBadge} />}
                     </button>
                   )}
                 </div>
@@ -249,7 +253,7 @@ export function CardModal({ card }: Props) {
                   onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--color-rim)' }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
                 >
-                  {isWant ? 'Skip · Save it' : 'Pass'}<KbdHint k="Esc" />
+                  {isWant ? 'Skip · Save it' : 'Pass'}{dismissBadge && <KbdHint k={dismissBadge} />}
                 </button>
               )}
               {unaffordable ? (
@@ -264,7 +268,7 @@ export function CardModal({ card }: Props) {
                     cursor: 'pointer',
                   }}
                 >
-                  Borrow {formatCurrency(borrowAmount)} & Buy<KbdHint k="↵" />
+                  Borrow {formatCurrency(borrowAmount)} & Buy{primaryBadge && <KbdHint k={primaryBadge} />}
                 </button>
               ) : (
                 <button
@@ -278,7 +282,7 @@ export function CardModal({ card }: Props) {
                     cursor: 'pointer',
                   }}
                 >
-                  {isWant ? 'Spend It' : canDecline ? 'Accept' : 'Continue'}<KbdHint k="↵" />
+                  {isWant ? 'Spend It' : canDecline ? 'Accept' : 'Continue'}{primaryBadge && <KbdHint k={primaryBadge} />}
                 </button>
               )}
             </div>

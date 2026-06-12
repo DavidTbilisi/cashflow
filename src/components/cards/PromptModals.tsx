@@ -4,6 +4,7 @@ import { useGameStore } from '../../store/gameStore'
 import { computeSummary } from '../../domain/services/financialCalc'
 import { formatCurrency } from '../../utils/currency'
 import { KbdHint } from '../ui/KbdHint'
+import { useShortcutBadge } from '../../hooks/useGameShortcuts'
 
 function ModalShell({ accent, label, title, children }: { accent: string; label: string; title: string; children: ReactNode }) {
   return (
@@ -43,7 +44,7 @@ function ModalShell({ accent, label, title, children }: { accent: string; label:
   )
 }
 
-function PrimaryBtn({ onClick, disabled, color, hint, children }: { onClick: () => void; disabled?: boolean; color: string; hint?: string; children: ReactNode }) {
+function PrimaryBtn({ onClick, disabled, color, hint, children }: { onClick: () => void; disabled?: boolean; color: string; hint?: string | null; children: ReactNode }) {
   return (
     <button
       onClick={onClick}
@@ -62,7 +63,7 @@ function PrimaryBtn({ onClick, disabled, color, hint, children }: { onClick: () 
   )
 }
 
-function GhostBtn({ onClick, hint, children }: { onClick: () => void; hint?: string; children: ReactNode }) {
+function GhostBtn({ onClick, hint, children }: { onClick: () => void; hint?: string | null; children: ReactNode }) {
   return (
     <button
       onClick={onClick}
@@ -79,6 +80,8 @@ function GhostBtn({ onClick, hint, children }: { onClick: () => void; hint?: str
 // ── Opportunity: choose Small Deal or Big Deal ──────────────────────────────
 export function DealChooser() {
   const chooseDeal = useGameStore((s) => s.chooseDeal)
+  const smallBadge = useShortcutBadge('dealSmall')
+  const bigBadge = useShortcutBadge('dealBig')
   const Card = ({ size, color, title, sub }: { size: 'small' | 'big'; color: string; title: ReactNode; sub: string }) => (
     <button
       onClick={() => chooseDeal(size)}
@@ -93,8 +96,8 @@ export function DealChooser() {
     <ModalShell accent="#9bbb4c" label="Opportunity" title="Choose Your Deal">
       <p className="text-sm mb-4" style={{ color: 'var(--color-mist)' }}>Which kind of opportunity do you want to draw?</p>
       <div className="flex flex-col gap-2">
-        <Card size="small" color="#5B8FF9" title={<>Small Deal<KbdHint k="1" /></>} sub="Stocks & small real estate · ≤ $5,000 to get in" />
-        <Card size="big" color="#C8963C" title={<>Big Deal<KbdHint k="2" /></>} sub="Apartments & businesses · $6,000+ to get in" />
+        <Card size="small" color="#5B8FF9" title={<>Small Deal{smallBadge && <KbdHint k={smallBadge} />}</>} sub="Stocks & small real estate · ≤ $5,000 to get in" />
+        <Card size="big" color="#C8963C" title={<>Big Deal{bigBadge && <KbdHint k={bigBadge} />}</>} sub="Apartments & businesses · $6,000+ to get in" />
       </div>
     </ModalShell>
   )
@@ -105,6 +108,8 @@ export function CharityModal() {
   const game = useGameStore((s) => s.game)
   const accept = useGameStore((s) => s.acceptCharity)
   const decline = useGameStore((s) => s.declineCharity)
+  const primaryBadge = useShortcutBadge('primary')
+  const dismissBadge = useShortcutBadge('dismiss')
   if (!game) return null
   const player = game.players[game.currentPlayerIndex]
   const tithe = Math.round(computeSummary(player.finances).totalMonthlyIncome * 0.1)
@@ -116,8 +121,8 @@ export function CharityModal() {
         {ratRace ? 'to roll two dice on each of your next 3 turns.' : 'to choose how many dice you roll for the rest of the game.'}
       </p>
       <div className="flex gap-2">
-        <GhostBtn onClick={decline} hint="Esc">Decline</GhostBtn>
-        <PrimaryBtn onClick={accept} disabled={player.finances.cashBalance < tithe} color="#d9799f" hint="↵">
+        <GhostBtn onClick={decline} hint={dismissBadge}>Decline</GhostBtn>
+        <PrimaryBtn onClick={accept} disabled={player.finances.cashBalance < tithe} color="#d9799f" hint={primaryBadge}>
           {player.finances.cashBalance < tithe ? 'Not enough cash' : `Donate ${formatCurrency(tithe)}`}
         </PrimaryBtn>
       </div>
@@ -130,6 +135,7 @@ export function MarketModal() {
   const game = useGameStore((s) => s.game)
   const sell = useGameStore((s) => s.sellMarketAsset)
   const pass = useGameStore((s) => s.passMarket)
+  const dismissBadge = useShortcutBadge('dismiss')
   if (!game || !game.activeCard) return null
   const { activeCard: card, marketOffer: offers } = game
   const player = game.players[game.currentPlayerIndex]
@@ -156,7 +162,7 @@ export function MarketModal() {
         })}
       </div>
       <div className="flex">
-        <GhostBtn onClick={pass} hint="Esc">Keep · Pass</GhostBtn>
+        <GhostBtn onClick={pass} hint={dismissBadge}>Keep · Pass</GhostBtn>
       </div>
     </ModalShell>
   )
@@ -167,6 +173,8 @@ export function PurchaseModal() {
   const game = useGameStore((s) => s.game)
   const buy = useGameStore((s) => s.buyPending)
   const skip = useGameStore((s) => s.skipPending)
+  const primaryBadge = useShortcutBadge('primary')
+  const dismissBadge = useShortcutBadge('dismiss')
   if (!game || !game.pendingPurchase) return null
   const pp = game.pendingPurchase
   const cash = game.players[game.currentPlayerIndex].finances.cashBalance
@@ -187,8 +195,8 @@ export function PurchaseModal() {
         </span>
       </div>
       <div className="flex gap-2">
-        <GhostBtn onClick={skip} hint="Esc">Skip</GhostBtn>
-        <PrimaryBtn onClick={buy} disabled={!afford} color={accent} hint="↵">
+        <GhostBtn onClick={skip} hint={dismissBadge}>Skip</GhostBtn>
+        <PrimaryBtn onClick={buy} disabled={!afford} color={accent} hint={primaryBadge}>
           {afford ? (isDream ? 'Buy Dream' : 'Buy Business') : 'Not enough cash'}
         </PrimaryBtn>
       </div>

@@ -20,6 +20,7 @@ import { evaluateWinConditions, canEnterFastTrack } from '../domain/rules/winRul
 import { scoreNECST } from '../domain/rules/necstTest'
 import type { StartingProfile } from '../domain/data/startingProfiles'
 import { TIME_BASE, TIME_CAPACITY, DOODAD_NEGOTIATE_COST } from '../domain/services/timeService'
+import { SOCIAL_BASE, SOCIAL_CAP, CHARITY_SOCIAL_GAIN, NECST_DISCOUNT_COST, DREAM_NEUTRALIZE_COST, clampSocial } from '../domain/services/socialService'
 import { formatCurrency } from '../utils/currency'
 import { saveGame } from '../utils/persistence'
 
@@ -36,7 +37,7 @@ interface GameStore {
   /** Fast Track Charity perk: roll a chosen number of dice (1–3). */
   rollDiceWith: (count: number) => void
   resolveCard: (card: Card, accepted: boolean) => void
-  resolveNECST: (answers: NECSTAnswers) => void
+  resolveNECST: (answers: NECSTAnswers, useSocialDiscount?: boolean) => void
   // Rulebook interactions:
   chooseDeal: (size: 'small' | 'big') => void
   acceptCharity: () => void
@@ -44,6 +45,7 @@ interface GameStore {
   sellMarketAsset: (assetId: string) => void
   passMarket: () => void
   buyPending: () => void
+  neutralizeDreamMarker: () => void
   skipPending: () => void
   takeLoan: (amount: number) => void
   payOffDebt: (liabilityId: string, units?: number) => void
@@ -93,6 +95,8 @@ function makePlayer(
     dreamsOwned: [],
     freeTimeUnits: TIME_BASE[profile.quadrant],
     timeCapacity: TIME_CAPACITY[profile.quadrant],
+    socialCapital: SOCIAL_BASE[profile.quadrant],
+    socialCapitalCap: SOCIAL_CAP[profile.quadrant],
   }
 }
 
@@ -418,7 +422,15 @@ export const useGameStore = create<GameStore>()(
         acted = evaluateQuadrant(acted)
         // Quadrant advance: reset time to the new quadrant's base (systems = more freedom).
         if (acted.quadrant !== prevQuadrant) {
-          acted = { ...acted, freeTimeUnits: TIME_BASE[acted.quadrant], timeCapacity: TIME_CAPACITY[acted.quadrant] }
+          // Network widens with the quadrant: raise the cap, keep banked SC (clamped).
+          const socialCapitalCap = SOCIAL_CAP[acted.quadrant]
+          acted = {
+            ...acted,
+            freeTimeUnits: TIME_BASE[acted.quadrant],
+            timeCapacity: TIME_CAPACITY[acted.quadrant],
+            socialCapitalCap,
+            socialCapital: clampSocial(acted.socialCapital, socialCapitalCap),
+          }
         }
         // Charity's extra die counts down each Rat Race turn.
         if (acted.extraDiceTurns > 0 && acted.boardTrack === 'rat_race') {
@@ -496,7 +508,7 @@ export const useGameStore = create<GameStore>()(
       set({ game: fresh(endCheck(state)) })
     },
 
-    resolveNECST: (answers) => {
+    resolveNECST: (answers, useSocialDiscount = false) => {
       const { game } = get()
       if (!game || !game.activeCard) return
       const idx = game.currentPlayerIndex
@@ -504,10 +516,17 @@ export const useGameStore = create<GameStore>()(
       const discardedPiles = card.type !== 'event'
         ? { ...game.discardPiles, [card.type]: [...(game.discardPiles[card.type] ?? []), card] }
         : game.discardPiles
-      const threshold = card.necstPassThreshold ?? 3
-      const { passed } = scoreNECST(answers, threshold)
+      const baseThreshold = card.necstPassThreshold ?? 3
 
       let player = game.players[idx]
+      // Social Capital sink: spend SC to have an advisor vouch — lowers the bar by 1.
+      const discountApplies = useSocialDiscount && baseThreshold > 1 && player.socialCapital >= NECST_DISCOUNT_COST
+      if (discountApplies) {
+        player = applyCardEffect(player, { type: 'spend_social', amount: NECST_DISCOUNT_COST }, game.turn)
+      }
+      const threshold = discountApplies ? baseThreshold - 1 : baseThreshold
+      const { passed } = scoreNECST(answers, threshold)
+
       for (const effect of card.effects) {
         if (effect.type === 'necst_gate') {
           for (const e of passed ? effect.onPass : effect.onFail) {
@@ -541,6 +560,8 @@ export const useGameStore = create<GameStore>()(
         finances: { ...player.finances, cashBalance: player.finances.cashBalance - tithe },
         extraDiceTurns: player.boardTrack === 'rat_race' ? 3 : player.extraDiceTurns,
         fastTrackDiceChoice: player.boardTrack === 'fast_track' ? true : player.fastTrackDiceChoice,
+        // Generosity also builds the network — Charity earns Social Capital.
+        socialCapital: clampSocial(player.socialCapital + CHARITY_SOCIAL_GAIN, player.socialCapitalCap),
       }
       set({ game: fresh(endCheck(setPlayer(game, idx, updated))) })
     },
@@ -602,6 +623,29 @@ export const useGameStore = create<GameStore>()(
         }
       }
       set({ game: fresh(endCheck(setPlayer(game, idx, updated))) })
+    },
+
+    neutralizeDreamMarker: () => {
+      const { game } = get()
+      if (!game || game.pendingPurchase?.kind !== 'dream') return
+      const idx = game.currentPlayerIndex
+      const player = game.players[idx]
+      const pp = game.pendingPurchase
+      const dreamId = game.boardSpaces.find((s) => s.id === pp.spaceId)?.dreamId
+      const dream = dreamId ? DREAMS.find((d) => d.id === dreamId) : undefined
+      if (!dreamId || !dream) return
+      const markers = game.dreamMarkers[dreamId] ?? 0
+      // Only worth it if a rival marker exists and you can afford the favor.
+      if (markers <= 0 || player.socialCapital < DREAM_NEUTRALIZE_COST) return
+      const newMarkers = markers - 1
+      const updated = applyCardEffect(player, { type: 'spend_social', amount: DREAM_NEUTRALIZE_COST }, game.turn)
+      set({
+        game: fresh({
+          ...setPlayer(game, idx, updated),
+          dreamMarkers: { ...game.dreamMarkers, [dreamId]: newMarkers },
+          pendingPurchase: { ...pp, cost: dream.cost * (1 + newMarkers) },
+        }),
+      })
     },
 
     skipPending: () => {

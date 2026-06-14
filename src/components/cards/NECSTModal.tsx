@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { NECST_QUESTIONS } from '../../domain/rules/necstTest'
+import { NECST_DISCOUNT_COST } from '../../domain/services/socialService'
 import { useGameStore } from '../../store/gameStore'
 import { useUIStore } from '../../store/uiStore'
 import type { NECSTAnswers } from '../../domain/entities/types'
@@ -9,16 +10,22 @@ export function NECSTModal() {
   const [answers, setAnswers] = useState<NECSTAnswers>({
     need: false, entry: false, control: false, scale: false, time: false,
   })
+  const [useDiscount, setUseDiscount] = useState(false)
   const resolveNECST = useGameStore((s) => s.resolveNECST)
   const closeModal = useUIStore((s) => s.closeModal)
   const card = useGameStore((s) => s.game?.activeCard)
+  const player = useGameStore((s) => s.game ? s.game.players[s.game.currentPlayerIndex] : null)
 
   const score = Object.values(answers).filter(Boolean).length
-  const threshold = card?.necstPassThreshold ?? 3
+  const baseThreshold = card?.necstPassThreshold ?? 3
+  // SC sink: an advisor's vouch lowers the bar by 1 (only meaningful above 1).
+  const canDiscount = baseThreshold > 1 && (player?.socialCapital ?? 0) >= NECST_DISCOUNT_COST
+  const discountActive = useDiscount && canDiscount
+  const threshold = discountActive ? baseThreshold - 1 : baseThreshold
   const passes = score >= threshold
 
   const handleSubmit = () => {
-    resolveNECST(answers)
+    resolveNECST(answers, discountActive)
     closeModal()
   }
 
@@ -91,6 +98,36 @@ export function NECSTModal() {
               </label>
             ))}
           </div>
+
+          {canDiscount && (
+            <button
+              onClick={() => setUseDiscount((v) => !v)}
+              className="mt-4 w-full flex items-center justify-between px-3 py-2 text-left transition-colors"
+              style={{
+                background: discountActive ? 'rgba(91,200,160,0.12)' : 'transparent',
+                border: `1px solid ${discountActive ? 'rgba(91,200,160,0.4)' : 'var(--color-rim)'}`,
+                borderRadius: '3px',
+                cursor: 'pointer',
+              }}
+            >
+              <span className="text-xs leading-snug" style={{ color: discountActive ? '#5BC8A0' : 'var(--color-mist)' }}>
+                <span className="font-semibold">🤝 Call in a favor</span>
+                <span className="block text-[10px]" style={{ color: 'var(--color-fog)' }}>
+                  Spend {NECST_DISCOUNT_COST} SC — a trusted advisor vouches, lowering the bar to {baseThreshold - 1}/5.
+                </span>
+              </span>
+              <span
+                className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 ml-3 flex-shrink-0"
+                style={{
+                  background: discountActive ? '#5BC8A0' : 'var(--color-rim)',
+                  color: discountActive ? 'var(--color-ink)' : 'var(--color-fog)',
+                  borderRadius: '2px',
+                }}
+              >
+                {discountActive ? 'On' : 'Off'}
+              </span>
+            </button>
+          )}
 
           <div
             className="mt-5 pt-4"

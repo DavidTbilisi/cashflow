@@ -166,6 +166,10 @@ const CARD_DRAW_INFO: Record<string, ConceptInfo> = {
     title: 'Market',
     body: 'Shifting market conditions and decisions that move the value and income of the assets you hold.',
   },
+  Network: {
+    title: 'Network',
+    body: 'Draw a relationship card. Build Social Capital by giving first, then spend it on off-market deals and favors that cash alone can’t reach.',
+  },
 }
 
 /** Tooltip copy for any board tile, by its type (anchors reuse ANCHOR_INFO). */

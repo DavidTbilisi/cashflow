@@ -57,6 +57,8 @@ export function makePlayer(overrides: Partial<PlayerState> = {}): PlayerState {
     dreamsOwned: [],
     freeTimeUnits: 5,
     timeCapacity: 10,
+    socialCapital: 2,
+    socialCapitalCap: 6,
     ...overrides,
   }
 }

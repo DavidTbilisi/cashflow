@@ -10,6 +10,7 @@ import type {
   Liability,
 } from '../entities/types'
 import { formatCurrency } from '../../utils/currency'
+import { clampSocial } from './socialService'
 
 export function computeSummary(fin: FinancialStatement): FinancialSummary {
   const totalMonthlyIncome = fin.incomeSources.reduce((s, i) => s + i.monthlyAmount, 0)
@@ -292,6 +293,27 @@ export function applyCardEffect(
 
     case 'necst_gate':
       return player  // handled by turnService after NECST modal
+
+    case 'gain_social': {
+      const next = clampSocial(player.socialCapital + effect.amount, player.socialCapitalCap)
+      return { ...player, socialCapital: next }
+    }
+
+    case 'spend_social': {
+      const next = clampSocial(player.socialCapital - effect.amount, player.socialCapitalCap)
+      return { ...player, socialCapital: next }
+    }
+
+    case 'social_gate': {
+      const canAfford = player.socialCapital >= effect.cost
+      let next = canAfford
+        ? { ...player, socialCapital: clampSocial(player.socialCapital - effect.cost, player.socialCapitalCap) }
+        : player
+      for (const e of canAfford ? effect.onAfford : effect.onShort) {
+        next = applyCardEffect(next, e, turn)
+      }
+      return next
+    }
   }
 }
 

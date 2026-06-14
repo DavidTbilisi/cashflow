@@ -21,6 +21,7 @@ const TYPE_META: Record<string, { color: string; label: string }> = {
   system_building:     { color: '#A87BF0', label: 'System' },
   decision_temptation: { color: '#F0A050', label: 'Decision' },
   obstacle_challenge:  { color: '#F06070', label: 'Obstacle' },
+  network:             { color: '#5BC8A0', label: 'Network' },
 }
 
 const LIFESTYLE_NEED_COLOR = '#F06070'

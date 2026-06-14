@@ -36,7 +36,7 @@ const RR_PLAN: Record<number, { type: SpaceType; label: string; deck?: CardType 
   29: { type: 'card_draw', label: 'Build', deck: 'system_building' },
   31: { type: 'downsized', label: 'Downsized' },
   32: { type: 'baby', label: 'Baby' },
-  33: { type: 'doodad', label: 'Expense' },
+  33: { type: 'card_draw', label: 'Network', deck: 'network' },
   34: { type: 'charity', label: 'Charity' },
   35: { type: 'doodad', label: 'Expense' },
   37: { type: 'card_draw', label: 'Obstacle', deck: 'obstacle_challenge' },

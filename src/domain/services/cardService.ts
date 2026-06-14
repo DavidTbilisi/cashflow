@@ -6,6 +6,7 @@ import { assetCards } from '../data/cards/assetCards'
 import { systemCards } from '../data/cards/systemCards'
 import { decisionCards } from '../data/cards/decisionCards'
 import { obstacleCards } from '../data/cards/obstacleCards'
+import { networkCards } from '../data/cards/networkCards'
 import { smallDealCards } from '../data/cards/smallDealCards'
 import { bigDealCards } from '../data/cards/bigDealCards'
 import { marketCards } from '../data/cards/marketCards'
@@ -24,6 +25,7 @@ const ALL_DECKS: Record<string, Card[]> = {
   system_building: systemCards,
   decision_temptation: decisionCards,
   obstacle_challenge: obstacleCards,
+  network: networkCards,
 }
 
 function shuffle<T>(arr: T[], rng: () => number): T[] {

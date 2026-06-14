@@ -401,6 +401,75 @@ describe('resolveNECST', () => {
     resolveNECST({ need: true, entry: true, control: true, scale: true, time: false })
     expect(getPlayer().finances.cashBalance).toBe(before - 2000)
   })
+
+  /** Patch the current player's Social Capital for discount tests. */
+  function setSocial(socialCapital: number) {
+    const g = getGame()
+    useGameStore.setState({
+      game: { ...g, players: g.players.map((p, i) => (i === 0 ? { ...p, socialCapital, socialCapitalCap: 25 } : p)) },
+    })
+  }
+
+  it('social discount lowers the bar by 1 and spends SC (2 yes passes at threshold 3)', () => {
+    setSocial(6)
+    const before = getPlayer().finances.cashBalance
+    // Only 2 of 5 — would fail at the default threshold 3, but the discount drops it to 2.
+    resolveNECST({ need: true, entry: true, control: false, scale: false, time: false }, true)
+    expect(getPlayer().finances.cashBalance).toBe(before + 5000) // onPass
+    expect(getPlayer().socialCapital).toBe(2) // 6 − 4
+  })
+
+  it('social discount is ignored when SC is insufficient (no spend, no help)', () => {
+    setSocial(3) // < NECST_DISCOUNT_COST (4)
+    const before = getPlayer().finances.cashBalance
+    resolveNECST({ need: true, entry: true, control: false, scale: false, time: false }, true)
+    expect(getPlayer().finances.cashBalance).toBe(before - 2000) // still fails at 3
+    expect(getPlayer().socialCapital).toBe(3) // unchanged
+  })
+})
+
+// ── neutralizeDreamMarker ───────────────────────────────────────────────────────
+
+describe('neutralizeDreamMarker', () => {
+  // dream_island (cost 250000) sits on Fast Track space ft_1.
+  const DREAM_ID = 'dream_island'
+  const SPACE_ID = 'ft_1'
+  const BASE = 250000
+
+  function setup(markers: number, socialCapital: number) {
+    const g = getGame()
+    useGameStore.setState({
+      game: {
+        ...g,
+        players: g.players.map((p, i) => (i === 0 ? { ...p, socialCapital, socialCapitalCap: 25 } : p)),
+        dreamMarkers: { [DREAM_ID]: markers },
+        pendingPurchase: { kind: 'dream', spaceId: SPACE_ID, label: 'Private Island', cost: BASE * (1 + markers), cashFlow: 0 },
+      },
+    })
+  }
+
+  it('removes one marker, lowers the cost, and spends 5 SC', () => {
+    setup(2, 8)
+    useGameStore.getState().neutralizeDreamMarker()
+    expect(getGame().dreamMarkers[DREAM_ID]).toBe(1)
+    expect(getGame().pendingPurchase!.cost).toBe(BASE * 2) // 1 marker left
+    expect(getPlayer().socialCapital).toBe(3) // 8 − 5
+  })
+
+  it('is a no-op when SC is insufficient', () => {
+    setup(2, 4) // < 5
+    useGameStore.getState().neutralizeDreamMarker()
+    expect(getGame().dreamMarkers[DREAM_ID]).toBe(2) // unchanged
+    expect(getGame().pendingPurchase!.cost).toBe(BASE * 3)
+    expect(getPlayer().socialCapital).toBe(4)
+  })
+
+  it('is a no-op when there are no markers to remove', () => {
+    setup(0, 10)
+    useGameStore.getState().neutralizeDreamMarker()
+    expect(getGame().dreamMarkers[DREAM_ID]).toBe(0)
+    expect(getPlayer().socialCapital).toBe(10) // no spend
+  })
 })
 
 // ── END_TURN ──────────────────────────────────────────────────────────────────

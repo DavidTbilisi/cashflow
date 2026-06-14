@@ -81,7 +81,7 @@ export function PositionPanel() {
                     opacity: active ? 1 : 0.45,
                   }}
                 >
-                  {SPACE_EMOJI[space.type] ?? '·'}
+                  {space.label === 'Network' ? '🤝' : SPACE_EMOJI[space.type] ?? '·'}
                 </span>
                 <span
                   style={{

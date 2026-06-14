@@ -2,6 +2,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import type { ReactNode } from 'react'
 import { useGameStore } from '../../store/gameStore'
 import { computeSummary } from '../../domain/services/financialCalc'
+import { DREAM_NEUTRALIZE_COST } from '../../domain/services/socialService'
+import { DREAMS } from '../../domain/data/fastTrack'
 import { formatCurrency } from '../../utils/currency'
 import { KbdHint } from '../ui/KbdHint'
 import { useShortcutBadge } from '../../hooks/useGameShortcuts'
@@ -173,14 +175,23 @@ export function PurchaseModal() {
   const game = useGameStore((s) => s.game)
   const buy = useGameStore((s) => s.buyPending)
   const skip = useGameStore((s) => s.skipPending)
+  const neutralize = useGameStore((s) => s.neutralizeDreamMarker)
   const primaryBadge = useShortcutBadge('primary')
   const dismissBadge = useShortcutBadge('dismiss')
   if (!game || !game.pendingPurchase) return null
   const pp = game.pendingPurchase
-  const cash = game.players[game.currentPlayerIndex].finances.cashBalance
+  const player = game.players[game.currentPlayerIndex]
+  const cash = player.finances.cashBalance
   const afford = cash >= pp.cost
   const isDream = pp.kind === 'dream'
   const accent = isDream ? '#d9799f' : '#9bbb4c'
+
+  // SC sink: rivals who landed on your Dream inflated its price; pull strings to undo one.
+  const dreamId = isDream ? game.boardSpaces.find((s) => s.id === pp.spaceId)?.dreamId : undefined
+  const markers = dreamId ? (game.dreamMarkers[dreamId] ?? 0) : 0
+  const baseCost = dreamId ? DREAMS.find((d) => d.id === dreamId)?.cost ?? 0 : 0
+  const canNeutralize = markers > 0 && player.socialCapital >= DREAM_NEUTRALIZE_COST
+
   return (
     <ModalShell accent={accent} label={isDream ? 'Dream' : 'Business Investment'} title={pp.label}>
       <p className="text-sm mb-3" style={{ color: 'var(--color-mist)' }}>
@@ -194,6 +205,39 @@ export function PurchaseModal() {
           −{formatCurrency(pp.cost)} · cash {formatCurrency(cash)}
         </span>
       </div>
+
+      {isDream && markers > 0 && (
+        <div
+          className="mb-4 px-3 py-2"
+          style={{ background: 'rgba(91,200,160,0.08)', border: '1px solid rgba(91,200,160,0.25)', borderRadius: '3px' }}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] leading-snug" style={{ color: 'var(--color-mist)' }}>
+              Rivals inflated this Dream by {markers}× (+{formatCurrency(baseCost * markers)}).
+            </span>
+            <button
+              onClick={neutralize}
+              disabled={!canNeutralize}
+              className="ml-3 px-2.5 py-1 text-[11px] font-semibold flex-shrink-0"
+              style={{
+                background: canNeutralize ? '#5BC8A0' : 'var(--color-rim)',
+                color: canNeutralize ? 'var(--color-ink)' : 'var(--color-fog)',
+                borderRadius: '2px',
+                border: 'none',
+                cursor: canNeutralize ? 'pointer' : 'not-allowed',
+              }}
+            >
+              🤝 Pull strings −{DREAM_NEUTRALIZE_COST} SC
+            </button>
+          </div>
+          {!canNeutralize && (
+            <p className="text-[10px] mt-1" style={{ color: 'var(--color-fog)' }}>
+              Need {DREAM_NEUTRALIZE_COST} SC — you have {player.socialCapital}.
+            </p>
+          )}
+        </div>
+      )}
+
       <div className="flex gap-2">
         <GhostBtn onClick={skip} hint={dismissBadge}>Skip</GhostBtn>
         <PrimaryBtn onClick={buy} disabled={!afford} color={accent} hint={primaryBadge}>

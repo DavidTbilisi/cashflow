@@ -17,6 +17,7 @@ export type CardType =
   | 'system_building'
   | 'decision_temptation'
   | 'obstacle_challenge'
+  | 'network' // Social Capital: build/spend your network for deal access & favors
   | 'event' // synthetic, store-generated notification (Baby, Downsized, Tax Audit…)
 
 export type BoardTrack = 'rat_race' | 'fast_track'
@@ -212,6 +213,12 @@ export interface PlayerState {
   freeTimeUnits: number
   /** Maximum free time — set by quadrant, grows as you advance E→S→B→I. */
   timeCapacity: number
+
+  // ── Social Capital ("your Network") ──
+  /** Banked relationship capital. Spend for off-market deal access & favors. */
+  socialCapital: number
+  /** Cap on banked SC — set by quadrant, widens as you advance E→S→B→I. */
+  socialCapitalCap: number
 }
 
 // ── Board ─────────────────────────────────────────────────────────────────
@@ -255,6 +262,12 @@ export type CardEffect =
   | { type: 'lose_turn'; turns: number }
   | { type: 'add_child' } // Baby / "Twins!" — +1 child up to the cap
   | { type: 'necst_gate'; onPass: CardEffect[]; onFail: CardEffect[] }
+  // ── Social Capital ──
+  | { type: 'gain_social'; amount: number; label: string }
+  | { type: 'spend_social'; amount: number }
+  /** Network gate: if the player can afford `cost` SC, spend it and apply
+   *  onAfford; otherwise apply onShort. The social analogue of necst_gate. */
+  | { type: 'social_gate'; cost: number; onAfford: CardEffect[]; onShort: CardEffect[] }
 
 /** Payload on a Market card: who can sell what, and for how much. */
 export interface MarketEvent {

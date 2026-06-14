@@ -270,6 +270,57 @@ describe('applyCardEffect', () => {
     applyCardEffect(player, { type: 'cash_gain', amount: 9999 }, 1)
     expect(player.finances.cashBalance).toBe(original)
   })
+
+  // ── Social Capital ──
+  it('gain_social adds to the pool, clamped to the cap', () => {
+    const player = makePlayer({ socialCapital: 2, socialCapitalCap: 6 })
+    const result = applyCardEffect(player, { type: 'gain_social', amount: 3, label: 'Intro' }, 1)
+    expect(result.socialCapital).toBe(5)
+  })
+
+  it('gain_social never exceeds the cap', () => {
+    const player = makePlayer({ socialCapital: 5, socialCapitalCap: 6 })
+    const result = applyCardEffect(player, { type: 'gain_social', amount: 10, label: 'Intro' }, 1)
+    expect(result.socialCapital).toBe(6)
+  })
+
+  it('spend_social deducts, never going below zero', () => {
+    const player = makePlayer({ socialCapital: 2, socialCapitalCap: 6 })
+    const result = applyCardEffect(player, { type: 'spend_social', amount: 5 }, 1)
+    expect(result.socialCapital).toBe(0)
+  })
+
+  it('social_gate spends cost and applies onAfford when affordable', () => {
+    const player = makePlayer({ socialCapital: 5, socialCapitalCap: 6 })
+    const result = applyCardEffect(
+      player,
+      {
+        type: 'social_gate',
+        cost: 5,
+        onAfford: [{ type: 'gain_social', amount: 6, label: 'goodwill' }],
+        onShort: [{ type: 'cash_loss', amount: 2000 }],
+      },
+      1,
+    )
+    expect(result.socialCapital).toBe(6) // 5 - 5 + 6, clamped to cap
+    expect(result.finances.cashBalance).toBe(player.finances.cashBalance)
+  })
+
+  it('social_gate applies onShort and spends nothing when too poor', () => {
+    const player = makePlayer({ socialCapital: 2, socialCapitalCap: 6 })
+    const result = applyCardEffect(
+      player,
+      {
+        type: 'social_gate',
+        cost: 5,
+        onAfford: [{ type: 'gain_social', amount: 6, label: 'goodwill' }],
+        onShort: [{ type: 'cash_loss', amount: 2000 }],
+      },
+      1,
+    )
+    expect(result.socialCapital).toBe(2) // unchanged — couldn't afford
+    expect(result.finances.cashBalance).toBe(player.finances.cashBalance - 2000)
+  })
 })
 
 describe('applyPayday', () => {

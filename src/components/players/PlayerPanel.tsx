@@ -2,6 +2,7 @@ import { useGameStore } from '../../store/gameStore'
 import { ESBIIndicator } from '../progress/ESBIIndicator'
 import { PassiveIncomeGauge } from '../financial/PassiveIncomeGauge'
 import { TimeGauge } from '../financial/TimeGauge'
+import { SocialGauge } from '../financial/SocialGauge'
 import { computeSummary } from '../../domain/services/financialCalc'
 import { canEnterFastTrack } from '../../domain/rules/winRules'
 import { formatCurrency } from '../../utils/currency'
@@ -103,6 +104,10 @@ export function PlayerPanel() {
 
       <div className="pt-1" style={{ borderTop: '1px solid var(--color-rim)' }}>
         <TimeGauge player={player} />
+      </div>
+
+      <div className="pt-1" style={{ borderTop: '1px solid var(--color-rim)' }}>
+        <SocialGauge player={player} />
       </div>
 
       {onFastTrack && (

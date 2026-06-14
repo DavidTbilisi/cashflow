@@ -81,7 +81,7 @@ export function PlayerPanel() {
         </div>
       )}
 
-      <div className="space-y-2">
+      <div className="space-y-2" data-tutorial="finances">
         <StatRow label="Cash" value={formatCurrency(player.finances.cashBalance)} color="var(--color-seafoam)" info={TERM_INFO.cash} />
         <StatRow
           label="Monthly CF"
@@ -97,7 +97,7 @@ export function PlayerPanel() {
         />
       </div>
 
-      <div className="pt-1" style={{ borderTop: '1px solid var(--color-rim)' }}>
+      <div className="pt-1" style={{ borderTop: '1px solid var(--color-rim)' }} data-tutorial="passive">
         <PassiveIncomeGauge player={player} />
       </div>
 
@@ -138,6 +138,7 @@ export function PlayerPanel() {
         {phase === 'rolling' ? (
           // Step 2 of the turn: the dice are cast, now a dedicated button advances the pawn.
           <button
+            data-tutorial="primary-action"
             onClick={() => dispatch({ type: 'MOVE_COMPLETE' })}
             className="w-full py-3 font-semibold text-xs tracking-[0.12em] uppercase transition-all active:scale-[0.98]"
             style={{
@@ -172,6 +173,7 @@ export function PlayerPanel() {
         ) : (
           // Step 1 of the turn: roll the dice (or skip / lose a turn).
           <button
+            data-tutorial="primary-action"
             onClick={() => dispatch({ type: 'ROLL_DICE' })}
             disabled={!canRoll}
             className="w-full py-3 font-semibold text-xs tracking-[0.12em] uppercase transition-all active:scale-[0.98]"
@@ -189,6 +191,7 @@ export function PlayerPanel() {
         )}
 
         <button
+          data-tutorial="end-turn"
           onClick={() => dispatch({ type: 'END_TURN' })}
           disabled={!canEndTurn}
           className="w-full py-2 text-xs font-medium tracking-wider uppercase transition-all"

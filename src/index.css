@@ -31,3 +31,16 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* Tutorial spotlight + coach */
+@keyframes tutorial-ring-pulse {
+  0%, 100% { box-shadow: 0 0 0 9999px rgba(7,10,18,0.55), 0 0 12px 1px rgba(200,150,60,0.45); }
+  50%      { box-shadow: 0 0 0 9999px rgba(7,10,18,0.55), 0 0 22px 4px rgba(200,150,60,0.85); }
+}
+.tutorial-ring { animation: tutorial-ring-pulse 1.6s ease-in-out infinite; }
+
+@keyframes tutorial-pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.4; transform: scale(0.7); }
+}
+.tutorial-pulse-dot { animation: tutorial-pulse-dot 1.2s ease-in-out infinite; }

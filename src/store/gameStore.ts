@@ -23,8 +23,9 @@ import { TIME_BASE, TIME_CAPACITY, DOODAD_NEGOTIATE_COST } from '../domain/servi
 import { formatCurrency } from '../utils/currency'
 import { saveGame } from '../utils/persistence'
 
-// Dev-only: consumed once by the next ROLL_DICE dispatch.
-let _debugDiceOverride: number[] | null = null
+// Forces the result of the next ROLL_DICE (consumed once). Set by the tutorial
+// to script deterministic landings, or by dev shortcuts.
+let _forcedDice: number[] | null = null
 
 interface GameStore {
   game: GameState | null
@@ -50,6 +51,8 @@ interface GameStore {
   /** Borrow the shortfall and purchase a deal card atomically — logged as one event. */
   borrowAndBuy: (card: Card) => void
   resetGame: () => void
+  /** Force the result of the next dice roll (consumed once). Used by the tutorial. */
+  forceNextDice: (values: number[]) => void
   // Dev-only debug actions (no-op in production builds):
   debugSetDice: (values: number[]) => void
   debugGiveMoney: (amount: number) => void
@@ -370,8 +373,8 @@ export const useGameStore = create<GameStore>()(
           set({ game: fresh({ ...skipped, currentPlayerIndex: next, round: next === 0 ? skipped.round + 1 : skipped.round, turn: skipped.turn + 1, currentTurnPhase: 'idle', lastDiceRoll: null }) })
           return
         }
-        const roll = _debugDiceOverride ?? rollDice(diceCountFor(player))
-        _debugDiceOverride = null
+        const roll = _forcedDice ?? rollDice(diceCountFor(player))
+        _forcedDice = null
         set({ game: fresh({ ...game, currentTurnPhase: 'rolling', lastDiceRoll: roll }) })
         return
       }
@@ -691,9 +694,13 @@ export const useGameStore = create<GameStore>()(
 
     resetGame: () => set({ game: null }),
 
+    forceNextDice: (values) => {
+      _forcedDice = values
+    },
+
     debugSetDice: (values) => {
       if (!import.meta.env.DEV) return
-      _debugDiceOverride = values
+      _forcedDice = values
     },
 
     debugGiveMoney: (amount) => {

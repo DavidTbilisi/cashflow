@@ -3,9 +3,11 @@ import { loadGame } from '../utils/persistence'
 interface Props {
   onNewGame: () => void
   onContinue: () => void
+  onTutorial: () => void
+  onHowToPlay: () => void
 }
 
-export function MainMenuScreen({ onNewGame, onContinue }: Props) {
+export function MainMenuScreen({ onNewGame, onContinue, onTutorial, onHowToPlay }: Props) {
   const hasSave = !!loadGame()
 
   return (
@@ -68,6 +70,42 @@ export function MainMenuScreen({ onNewGame, onContinue }: Props) {
             }}
           >
             New Game
+          </button>
+          <button
+            onClick={onTutorial}
+            className="w-full py-3 font-medium text-xs tracking-[0.1em] uppercase transition-all"
+            style={{
+              border: '1px solid rgba(200,150,60,0.45)',
+              color: 'var(--color-gold)',
+              fontFamily: 'var(--font-ui)',
+              borderRadius: '3px',
+              background: 'rgba(200,150,60,0.06)',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(200,150,60,0.14)' }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(200,150,60,0.06)' }}
+          >
+            Tutorial
+          </button>
+          <button
+            onClick={onHowToPlay}
+            className="w-full py-3 font-medium text-xs tracking-[0.1em] transition-all"
+            style={{
+              border: '1px solid var(--color-rim)',
+              color: 'var(--color-mist)',
+              fontFamily: 'var(--font-ui)',
+              borderRadius: '3px',
+              background: 'transparent',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = 'var(--color-wire)'
+              e.currentTarget.style.color = 'var(--color-snow)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = 'var(--color-rim)'
+              e.currentTarget.style.color = 'var(--color-mist)'
+            }}
+          >
+            How to Play
           </button>
           {hasSave && (
             <button

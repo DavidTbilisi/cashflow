@@ -13,6 +13,8 @@ import { useUIStore } from '../store/uiStore'
 import { useGameSounds } from '../hooks/useGameSounds'
 import { useShortcutEngine, ShortcutsContext } from '../hooks/useGameShortcuts'
 import { ShortcutHelp } from '../components/overlays/ShortcutHelp'
+import { useTutorialDriver } from '../hooks/useTutorialDriver'
+import { TutorialCoach } from '../components/tutorial/TutorialCoach'
 
 export function GameScreen() {
   const phase = useGameStore((s) => s.game?.currentTurnPhase)
@@ -30,6 +32,7 @@ export function GameScreen() {
   const showCard = !!activeCard && !showMarket && !showPurchase && !necstOpen
 
   useGameSounds()
+  useTutorialDriver()
   const shortcuts = useShortcutEngine()
 
   const player = game ? game.players[game.currentPlayerIndex] : null
@@ -73,6 +76,7 @@ export function GameScreen() {
         {necstOpen && <NECSTModal />}
 
         <ShortcutHelp />
+        <TutorialCoach />
         <button
           onClick={toggleHelp}
           title="Keyboard shortcuts (?)"

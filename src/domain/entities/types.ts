@@ -108,6 +108,8 @@ export interface Asset {
   monthlyExpense: number
   leverageUsed: boolean
   liabilityAmount: number
+  /** Cleared all five CENTS commandments at acquisition — a self-selling product (Unscripted). */
+  isProductocracy?: boolean
   acquiredAtTurn: number
   cardId: string
 }
@@ -292,6 +294,8 @@ export interface Card {
   marketEvent?: MarketEvent
   requiresNECST?: boolean
   necstPassThreshold?: number
+  /** Productocracy opportunity: a perfect (all-5) CENTS pass yields a self-selling asset. */
+  productocracy?: boolean
   effects: CardEffect[]
   lesson?: string
   /** Lifestyle expense sub-category: 'need' = mandatory (no decline); 'want' = discretionary (can be passed). */

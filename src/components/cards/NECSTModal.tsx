@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { NECST_QUESTIONS } from '../../domain/rules/necstTest'
+import { CENTS_ORDER, CENTS_LABELS, isProductocracy } from '../../domain/rules/productocracy'
 import { NECST_DISCOUNT_COST } from '../../domain/services/socialService'
 import { useGameStore } from '../../store/gameStore'
 import { useUIStore } from '../../store/uiStore'
@@ -15,6 +16,14 @@ export function NECSTModal() {
   const closeModal = useUIStore((s) => s.closeModal)
   const card = useGameStore((s) => s.game?.activeCard)
   const player = useGameStore((s) => s.game ? s.game.players[s.game.currentPlayerIndex] : null)
+
+  // Productocracy cards run the SAME five commandments under the CENTS framing,
+  // ordered Control·Entry·Need·Time·Scale, and reward clearing all five.
+  const isProducto = card?.productocracy === true
+  const questions = isProducto
+    ? CENTS_ORDER.map((key) => ({ key, question: NECST_QUESTIONS.find((q) => q.key === key)!.question }))
+    : NECST_QUESTIONS
+  const perfect = isProductocracy(answers)
 
   const score = Object.values(answers).filter(Boolean).length
   const baseThreshold = card?.necstPassThreshold ?? 3
@@ -59,7 +68,7 @@ export function NECSTModal() {
                 borderRadius: '2px',
               }}
             >
-              Venture Evaluation
+              {isProducto ? 'Productocracy Venture' : 'Venture Evaluation'}
             </span>
           </div>
 
@@ -67,14 +76,16 @@ export function NECSTModal() {
             className="text-2xl font-semibold mb-1 leading-tight"
             style={{ fontFamily: 'var(--font-display)', color: 'var(--color-snow)' }}
           >
-            NECST Test
+            {isProducto ? 'CENTS Test' : 'NECST Test'}
           </h2>
           <p className="text-xs mb-5" style={{ color: 'var(--color-fog)' }}>
-            Answer honestly — pass {threshold} of 5 criteria to proceed with this venture.
+            {isProducto
+              ? 'Clear all five CENTS commandments to build a productocracy — a product that sells itself.'
+              : `Answer honestly — pass ${threshold} of 5 criteria to proceed with this venture.`}
           </p>
 
           <div className="space-y-3">
-            {NECST_QUESTIONS.map(({ key, question }) => (
+            {questions.map(({ key, question }) => (
               <label key={key} className="flex items-start gap-3 cursor-pointer">
                 <input
                   type="checkbox"
@@ -91,13 +102,29 @@ export function NECSTModal() {
                     className="font-bold text-xs uppercase tracking-wider mr-1"
                     style={{ color: 'var(--color-honey)' }}
                   >
-                    {key}:
+                    {isProducto ? `${CENTS_LABELS[key].letter} · ${CENTS_LABELS[key].label}:` : `${key}:`}
                   </span>
                   {question}
                 </span>
               </label>
             ))}
           </div>
+
+          {isProducto && (
+            <div
+              className="mt-4 px-3 py-2 text-xs leading-snug"
+              style={{
+                background: perfect ? 'rgba(91,200,160,0.12)' : 'transparent',
+                border: `1px solid ${perfect ? 'rgba(91,200,160,0.4)' : 'var(--color-rim)'}`,
+                borderRadius: '3px',
+                color: perfect ? '#5BC8A0' : 'var(--color-fog)',
+              }}
+            >
+              {perfect
+                ? '★ Productocracy! All five commandments hold — the product sells itself (boosted passive income).'
+                : 'Productocracy requires all five — one weak commandment and it still needs ad spend.'}
+            </div>
+          )}
 
           {canDiscount && (
             <button

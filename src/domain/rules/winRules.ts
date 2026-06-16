@@ -1,6 +1,7 @@
 import type { GameState, PlayerState } from '../entities/types'
 import { computeSummary, checkBankruptcy } from '../services/financialCalc'
 import { allAnchorsUnlocked } from './anchorRules'
+import { hasSelfSufficientProductocracy } from './productocracy'
 
 export type WinResult =
   | { status: 'continue' }
@@ -13,6 +14,9 @@ export type WinResult =
  */
 export function canEnterFastTrack(player: PlayerState): boolean {
   if (player.boardTrack !== 'rat_race') return false
+  // Unscripted: a single self-sufficient productocracy is escape velocity on its own —
+  // you don't need to stack a portfolio of small deals to clear the Rat Race.
+  if (hasSelfSufficientProductocracy(player)) return true
   const s = computeSummary(player.finances)
   return s.totalPassiveIncome > s.totalMonthlyExpenses
 }

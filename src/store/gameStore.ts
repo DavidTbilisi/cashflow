@@ -18,6 +18,7 @@ import {
 } from '../domain/services/financialCalc'
 import { evaluateWinConditions, canEnterFastTrack } from '../domain/rules/winRules'
 import { scoreNECST } from '../domain/rules/necstTest'
+import { isProductocracy, applyProductocracyBonus } from '../domain/rules/productocracy'
 import type { StartingProfile } from '../domain/data/startingProfiles'
 import { TIME_BASE, TIME_CAPACITY, DOODAD_NEGOTIATE_COST } from '../domain/services/timeService'
 import { SOCIAL_BASE, SOCIAL_CAP, CHARITY_SOCIAL_GAIN, NECST_DISCOUNT_COST, DREAM_NEUTRALIZE_COST, clampSocial } from '../domain/services/socialService'
@@ -527,9 +528,17 @@ export const useGameStore = create<GameStore>()(
       const threshold = discountApplies ? baseThreshold - 1 : baseThreshold
       const { passed } = scoreNECST(answers, threshold)
 
+      // Productocracy: a perfect (all-5) CENTS pass on a productocracy card yields a
+      // self-selling asset with boosted passive income. The discount can't buy this —
+      // it requires genuinely clearing all five commandments.
+      const perfect = card.productocracy === true && isProductocracy(answers)
+
       for (const effect of card.effects) {
         if (effect.type === 'necst_gate') {
-          for (const e of passed ? effect.onPass : effect.onFail) {
+          const branch = passed
+            ? applyProductocracyBonus(effect.onPass, perfect)
+            : effect.onFail
+          for (const e of branch) {
             player = applyCardEffect(player, e, game.turn)
           }
         }

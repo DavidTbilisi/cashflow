@@ -151,6 +151,11 @@ export interface FinancialStatement {
   /** Children add a recurring per-child expense (rulebook: max 3). */
   numberOfChildren: number
   perChildExpense: number
+  // ── Profit First envelopes (sealed; not spendable from cashBalance) ──
+  /** Profit account — skimmed off payday first, distributed quarterly. Sealed at "Bank 2". */
+  profitAccount?: number
+  /** Tax account — held against tax/penalty hits so the money is there at filing time. */
+  taxAccount?: number
 }
 
 // Computed — never stored directly; produced by financialCalc.ts
@@ -164,6 +169,8 @@ export interface FinancialSummary {
   totalLiabilities: number
   netWorth: number
   isPassiveIncomePositive: boolean
+  /** Profit + Tax envelopes — sealed money that still counts toward net worth and runway. */
+  sealedReserve: number
 }
 
 // ── Player ────────────────────────────────────────────────────────────────
@@ -189,6 +196,8 @@ export interface PlayerState {
   bankruptcyCount: number
   handCards: Card[]
   roundsPlayed: number
+  /** Last quarter (round / quarter-length) in which the Profit account paid out. */
+  lastProfitQuarter?: number
 
   // ── Rulebook mechanics ──
   /** Turns left rolling an extra die from Charity (Rat Race). */

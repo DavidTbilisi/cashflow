@@ -49,6 +49,20 @@ export function BalanceSheet({ player }: Props) {
         </div>
       </div>
 
+      {summary.sealedReserve > 0 && (
+        <div className="mt-2 pt-2" style={{ borderTop: '1px solid var(--color-rim)' }}>
+          <p
+            className="text-[10px] font-semibold mb-1 tracking-wider flex items-center gap-1"
+            style={{ color: 'var(--color-gold, #d9a441)' }}
+            title="Profit First: skimmed off each payday before it can be spent. Sealed — out of reach, but yours."
+          >
+            🔒 Sealed (Profit First)
+          </p>
+          {(finances.profitAccount ?? 0) > 0 && <Row label="Profit" value={finances.profitAccount ?? 0} />}
+          {(finances.taxAccount ?? 0) > 0 && <Row label="Tax" value={finances.taxAccount ?? 0} />}
+        </div>
+      )}
+
       <div
         className="mt-2 pt-2 flex justify-between items-center"
         style={{ borderTop: '1px solid var(--color-rim)' }}

@@ -1,5 +1,6 @@
 import type { PlayerState, AnchorId, AnchorStatus } from '../entities/types'
 import { computeSummary } from '../services/financialCalc'
+import { sealedReserve } from './profitFirst'
 
 const ANCHOR_ORDER: AnchorId[] = ['door', 'scale', 'safe', 'chain', 'engine', 'shield']
 
@@ -22,10 +23,11 @@ function canUnlock(player: PlayerState, id: AnchorId): boolean {
       return player.positiveCashFlowTurns >= 3
 
     case 'safe': {
-      // 6 months of expenses in cash
+      // 6 months of expenses in runway. Profit First: money you correctly sealed
+      // into the Profit/Tax envelopes still proves your runway — it isn't punished
+      // for not sitting in the spendable operating account.
       const buffer = summary.totalMonthlyExpenses * 6
-      return player.finances.cashBalance >= buffer
-
+      return player.finances.cashBalance + sealedReserve(player.finances) >= buffer
     }
 
     case 'chain':

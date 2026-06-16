@@ -19,6 +19,7 @@ import {
 import { evaluateWinConditions, canEnterFastTrack } from '../domain/rules/winRules'
 import { scoreNECST } from '../domain/rules/necstTest'
 import { isProductocracy, applyProductocracyBonus } from '../domain/rules/productocracy'
+import { allocatePayday, distributeProfit, currentQuarter } from '../domain/rules/profitFirst'
 import type { StartingProfile } from '../domain/data/startingProfiles'
 import { TIME_BASE, TIME_CAPACITY, DOODAD_NEGOTIATE_COST } from '../domain/services/timeService'
 import { SOCIAL_BASE, SOCIAL_CAP, CHARITY_SOCIAL_GAIN, NECST_DISCOUNT_COST, DREAM_NEUTRALIZE_COST, clampSocial } from '../domain/services/socialService'
@@ -86,6 +87,7 @@ function makePlayer(
     bankruptcyCount: 0,
     handCards: [],
     roundsPlayed: 0,
+    lastProfitQuarter: 0,
     extraDiceTurns: 0,
     fastTrackDiceChoice: false,
     skipTurns: 0,
@@ -168,16 +170,23 @@ function applyMovement(state: GameState, idx: number): { player: PlayerState; la
   const steps = diceTotal(state.lastDiceRoll ?? [0])
   const spaces = state.boardSpaces.filter((s) => s.track === player.boardTrack)
   const len = spaces.length
-  const payAmount = player.boardTrack === 'fast_track' ? player.cashflowDayIncome : computeSummary(player.finances).monthlyCashFlow
+  const onRatRace = player.boardTrack === 'rat_race'
+  const payAmount = onRatRace ? computeSummary(player.finances).monthlyCashFlow : player.cashflowDayIncome
 
-  let cash = player.finances.cashBalance
+  // Sum the paydays passed, then settle once. On the Rat Race the income is run
+  // through Profit First allocation (skim Profit/Tax first); on the Fast Track —
+  // the "won" state — it lands straight in spendable cash.
+  let paydayTotal = 0
   for (let k = 1; k <= steps; k++) {
     const tile = spaces[(player.boardPosition + k) % len]
-    if (tile.type === 'payday' || tile.type === 'cashflow_day') cash += payAmount
+    if (tile.type === 'payday' || tile.type === 'cashflow_day') paydayTotal += payAmount
   }
+  const finances = onRatRace
+    ? allocatePayday(player.finances, paydayTotal)
+    : { ...player.finances, cashBalance: player.finances.cashBalance + paydayTotal }
   const newPos = (player.boardPosition + steps) % len
   return {
-    player: { ...player, boardPosition: newPos, finances: { ...player.finances, cashBalance: cash } },
+    player: { ...player, boardPosition: newPos, finances },
     landed: spaces[newPos],
   }
 }
@@ -437,7 +446,28 @@ export const useGameStore = create<GameStore>()(
         if (acted.extraDiceTurns > 0 && acted.boardTrack === 'rat_race') {
           acted = { ...acted, extraDiceTurns: acted.extraDiceTurns - 1 }
         }
+        // Profit First: on this player's first turn of a new quarter, distribute
+        // half the sealed Profit account to them as a felt, spendable reward.
+        let profitWindfall = 0
+        const quarter = currentQuarter(state.round)
+        if (acted.boardTrack === 'rat_race' && (acted.lastProfitQuarter ?? 0) < quarter) {
+          const dist = distributeProfit(acted, quarter)
+          acted = dist.player
+          profitWindfall = dist.windfall
+        }
         state = setPlayer(state, idx, acted)
+        if (profitWindfall > 0) {
+          state = appendLog(state, {
+            id: `log_${state.turn}_profit`,
+            turn: state.turn,
+            round: state.round,
+            playerId: acted.id,
+            playerName: acted.name,
+            kind: 'income',
+            cashDelta: profitWindfall,
+            text: `${acted.name} took a quarterly Profit distribution · +${formatCurrency(profitWindfall)}`,
+          })
+        }
 
         const snap = computeSummary(acted.finances)
         const histPoint: PlayerHistoryPoint = {

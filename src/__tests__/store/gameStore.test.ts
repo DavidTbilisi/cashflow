@@ -171,8 +171,11 @@ describe('MOVE_COMPLETE on payday space', () => {
     dispatch({ type: 'MOVE_COMPLETE' })
     const p = getPlayer()
     expect(p.boardPosition).toBe(10)
-    // cashFlow = income(4000) - expense(1500) = +2500
-    expect(p.finances.cashBalance).toBe(startCash + 2500)
+    // cashFlow = income(4000) - expense(1500) = +2500, run through Profit First:
+    // Profit 15% (375) + Tax 15% (375) sealed, remainder 1750 → spendable cash.
+    expect(p.finances.cashBalance).toBe(startCash + 1750)
+    expect(p.finances.profitAccount).toBe(375)
+    expect(p.finances.taxAccount).toBe(375)
     expect(getGame().currentTurnPhase).toBe('end_check')
   })
 
@@ -192,7 +195,8 @@ describe('MOVE_COMPLETE on payday space', () => {
     dispatch({ type: 'MOVE_COMPLETE' })
     const p = getPlayer()
     expect(p.boardPosition).toBe(0)
-    expect(p.finances.cashBalance).toBe(3500) // 1000 + 2500 cash flow
+    // 1000 + (2500 payday − 375 Profit − 375 Tax skimmed) = 2750 spendable.
+    expect(p.finances.cashBalance).toBe(2750)
   })
 })
 

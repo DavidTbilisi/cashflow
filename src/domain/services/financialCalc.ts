@@ -11,6 +11,7 @@ import type {
 } from '../entities/types'
 import { formatCurrency } from '../../utils/currency'
 import { clampSocial } from './socialService'
+import { sealedReserve, absorbLoss } from '../rules/profitFirst'
 
 export function computeSummary(fin: FinancialStatement): FinancialSummary {
   const totalMonthlyIncome = fin.incomeSources.reduce((s, i) => s + i.monthlyAmount, 0)
@@ -20,7 +21,8 @@ export function computeSummary(fin: FinancialStatement): FinancialSummary {
   const childExpense = fin.numberOfChildren * fin.perChildExpense
   const totalMonthlyExpenses =
     fin.expenseLines.reduce((s, e) => s + e.monthlyAmount, 0) + childExpense
-  const totalAssetValue = fin.assets.reduce((s, a) => s + a.currentValue, 0) + fin.cashBalance
+  const reserve = sealedReserve(fin)
+  const totalAssetValue = fin.assets.reduce((s, a) => s + a.currentValue, 0) + fin.cashBalance + reserve
   const totalLiabilities = fin.liabilities.reduce((s, l) => s + l.totalOwed, 0)
 
   return {
@@ -33,6 +35,7 @@ export function computeSummary(fin: FinancialStatement): FinancialSummary {
     totalLiabilities,
     netWorth: totalAssetValue - totalLiabilities,
     isPassiveIncomePositive: totalPassiveIncome >= totalMonthlyExpenses,
+    sealedReserve: reserve,
   }
 }
 
@@ -149,10 +152,10 @@ export function applyCardEffect(
     case 'cash_gain':
       return { ...player, finances: { ...fin, cashBalance: fin.cashBalance + effect.amount } }
 
-    case 'cash_loss': {
-      const after = fin.cashBalance - effect.amount
-      return { ...player, finances: { ...fin, cashBalance: after } }
-    }
+    case 'cash_loss':
+      // Crisis buffer: a loss that would overdraw the operating account is absorbed
+      // from the sealed Tax (then Profit) envelopes before it can cause bankruptcy.
+      return { ...player, finances: absorbLoss(fin, effect.amount) }
 
     case 'gain_income': {
       const src: IncomeSource = {

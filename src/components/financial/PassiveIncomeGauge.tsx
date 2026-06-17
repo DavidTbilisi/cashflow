@@ -29,22 +29,20 @@ export function PassiveIncomeGauge({ player }: Props) {
           style={{
             color: gaugeColor(pct),
             fontFamily: 'var(--font-data)',
+            textShadow: `0 0 8px ${gaugeColor(pct)}`,
           }}
         >
           {pct}%
         </span>
       </div>
 
-      <div
-        className="h-1.5 overflow-hidden"
-        style={{ background: 'var(--color-rim)', borderRadius: '2px' }}
-      >
+      <div className="neon-bar h-2">
         <div
-          className="h-full transition-all duration-700"
+          className="neon-bar-fill"
           style={{
             width: `${pct}%`,
             background: gaugeColor(pct),
-            borderRadius: '2px',
+            boxShadow: `0 0 10px ${gaugeColor(pct)}`,
           }}
         />
       </div>
@@ -59,15 +57,15 @@ export function PassiveIncomeGauge({ player }: Props) {
 
       {free && (
         <div
-          className="mt-1.5 text-center text-[11px] font-bold tracking-wider py-1"
+          className="arcade-clip-sm anim-pulse mt-1.5 text-center text-[11px] font-bold uppercase tracking-[0.2em] py-1.5"
           style={{
-            background: 'var(--color-wire)',
-            color: 'var(--color-snow)',
-            border: '1px solid var(--color-mist)',
-            borderRadius: '2px',
+            background: 'rgba(46,242,166,0.12)',
+            color: 'var(--color-seafoam)',
+            border: '1px solid var(--color-seafoam)',
+            boxShadow: '0 0 16px rgba(46,242,166,0.45), inset 0 0 12px rgba(46,242,166,0.15)',
           }}
         >
-          FINANCIAL FREEDOM
+          ◆ Financial Freedom ◆
         </div>
       )}
     </div>

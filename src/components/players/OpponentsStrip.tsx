@@ -19,9 +19,10 @@ export function OpponentsStrip() {
         return (
           <div
             key={p.id}
+            className="arcade-clip-sm"
             style={{
               border: '1px solid var(--color-rim)',
-              borderRadius: '2px',
+              background: 'var(--color-card)',
               padding: '4px 8px',
               display: 'flex',
               alignItems: 'center',
@@ -30,6 +31,17 @@ export function OpponentsStrip() {
               fontSize: '10px',
             }}
           >
+            <span
+              aria-hidden
+              style={{
+                width: '7px',
+                height: '7px',
+                borderRadius: '9999px',
+                background: p.color,
+                boxShadow: `0 0 7px ${p.color}`,
+                flexShrink: 0,
+              }}
+            />
             <span style={{ color: 'var(--color-fog)', minWidth: '20px' }}>P{i + 2}</span>
             <span
               style={{

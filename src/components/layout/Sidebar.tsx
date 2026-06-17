@@ -14,7 +14,8 @@ export function Sidebar() {
       style={{
         width: '340px',
         background: 'var(--color-paper)',
-        borderRight: '1px solid var(--color-rim)',
+        borderRight: '1px solid var(--color-iris)',
+        boxShadow: '1px 0 14px rgba(176,107,255,0.22)',
       }}
     >
       {/* Player identity header */}
@@ -22,16 +23,16 @@ export function Sidebar() {
         className="flex items-center gap-2.5 px-3 py-2.5 flex-shrink-0"
         style={{
           borderBottom: '1px solid var(--color-rim)',
-          background: 'var(--color-card)',
+          background: 'linear-gradient(180deg, var(--color-card), var(--color-paper))',
         }}
       >
         <div
-          className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-          style={{ background: player.color, boxShadow: `0 0 5px ${player.color}80` }}
+          className="w-2.5 h-2.5 rounded-full flex-shrink-0 anim-pulse"
+          style={{ background: player.color, color: player.color, boxShadow: `0 0 8px ${player.color}` }}
         />
         <span
-          className="font-semibold text-sm flex-1"
-          style={{ color: 'var(--color-snow)', fontFamily: 'var(--font-ui)' }}
+          className="font-semibold text-sm flex-1 uppercase tracking-wide"
+          style={{ color: 'var(--color-snow)', fontFamily: 'var(--font-display)' }}
         >
           {player.name}
         </span>

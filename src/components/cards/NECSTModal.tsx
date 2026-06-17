@@ -117,7 +117,7 @@ export function NECSTModal() {
                 background: perfect ? 'rgba(91,200,160,0.12)' : 'transparent',
                 border: `1px solid ${perfect ? 'rgba(91,200,160,0.4)' : 'var(--color-rim)'}`,
                 borderRadius: '3px',
-                color: perfect ? '#5BC8A0' : 'var(--color-fog)',
+                color: perfect ? '#2EF2A6' : 'var(--color-fog)',
               }}
             >
               {perfect
@@ -137,7 +137,7 @@ export function NECSTModal() {
                 cursor: 'pointer',
               }}
             >
-              <span className="text-xs leading-snug" style={{ color: discountActive ? '#5BC8A0' : 'var(--color-mist)' }}>
+              <span className="text-xs leading-snug" style={{ color: discountActive ? '#2EF2A6' : 'var(--color-mist)' }}>
                 <span className="font-semibold">🤝 Call in a favor</span>
                 <span className="block text-[10px]" style={{ color: 'var(--color-fog)' }}>
                   Spend {NECST_DISCOUNT_COST} SC — a trusted advisor vouches, lowering the bar to {baseThreshold - 1}/5.
@@ -146,7 +146,7 @@ export function NECSTModal() {
               <span
                 className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 ml-3 flex-shrink-0"
                 style={{
-                  background: discountActive ? '#5BC8A0' : 'var(--color-rim)',
+                  background: discountActive ? '#2EF2A6' : 'var(--color-rim)',
                   color: discountActive ? 'var(--color-ink)' : 'var(--color-fog)',
                   borderRadius: '2px',
                 }}

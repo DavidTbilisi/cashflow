@@ -8,7 +8,7 @@ const QUADRANT_ORDER: ESBIQuadrant[] = ['E', 'S', 'B', 'I']
 
 export function ESBISnapshot({ player }: Props) {
   return (
-    <ChartCard title="ESBI Quadrant">
+    <ChartCard title="ESBI Quadrant" accent="var(--color-gold)">
       <div style={{ display: 'flex', gap: '4px' }}>
         {QUADRANT_ORDER.map((q) => {
           const active = player.quadrant === q

@@ -1,41 +1,152 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
+/* ═══════════════════════════════════════════════════════════════════════════
+   NEON EXCHANGE — WEALTH ARCADE 198X
+   A synthwave / CRT trading-floor visual system.
+   Token names are unchanged so every existing component re-skins for free;
+   only their values + the effect layer below are new.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Bruno+Ace+SC&family=Bruno+Ace&family=Chakra+Petch:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --color-ink: #0B0B0B;
-  --color-paper: #141414;
-  --color-card: #1A1A1A;
-  --color-rim: #2A2A2A;
-  --color-wire: #3A3A3A;
-  --color-fog: #6E6E6E;
-  --color-mist: #9A9A9A;
-  --color-snow: #E6E6E6;
-  --color-seafoam: #4ade80;
-  --color-flame: #f87171;
-  --color-azure: #4ade80;
-  --color-gold: #fbbf24;
-  --color-honey: #fbbf24;
-  --color-iris: #a78bfa;
-  --font-display: 'JetBrains Mono', 'Courier New', monospace;
-  --font-ui: 'JetBrains Mono', 'Courier New', monospace;
-  --font-data: 'JetBrains Mono', 'Courier New', monospace;
+  /* ── Structural: deep void-violet, darkest → lightest ───────────────────── */
+  --color-ink:   #07040F;  /* page void + dark text on neon buttons */
+  --color-paper: #0E0A1E;  /* panels / main surfaces (violet-tinted) */
+  --color-card:  #15102A;  /* cards / modals */
+  --color-rim:   #2A2150;  /* borders, dividers */
+  --color-wire:  #3D3170;  /* stronger borders, grid lines, disabled */
+  --color-fog:   #8A7FB0;  /* secondary text / zero values */
+  --color-mist:  #B8AEDC;  /* tertiary text / body */
+  --color-snow:  #F2ECFF;  /* primary high-contrast text */
+
+  /* ── Neon semantic spectrum ─────────────────────────────────────────────── */
+  --color-seafoam: #2EF2A6;  /* positive money / success / primary action */
+  --color-flame:   #FF4D6D;  /* negative money / loss / danger */
+  --color-azure:   #2DE2FF;  /* passive income / info / secondary */
+  --color-gold:    #FFC93C;  /* premium / wealth / hero highlight */
+  --color-honey:   #FFC93C;  /* gauge mid-range (alias of gold) */
+  --color-iris:    #B06BFF;  /* special card types / systems */
+  --color-neon:    #FF2EA6;  /* hot-magenta arcade signature accent */
+
+  /* ── Typography ─────────────────────────────────────────────────────────── */
+  --font-display: 'Bruno Ace SC', 'Chakra Petch', system-ui, sans-serif;
+  --font-ui:      'Chakra Petch', system-ui, sans-serif;
+  --font-data:    'JetBrains Mono', 'Courier New', monospace;
 }
 
 * { box-sizing: border-box; }
 
+/* ── Page surface: vignette + faint neon grid floor ───────────────────────── */
 body {
   margin: 0;
-  background: var(--color-ink);
   color: var(--color-snow);
   font-family: var(--font-ui);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-ink);
+  background-image:
+    radial-gradient(120% 80% at 50% -10%, rgba(176,107,255,0.10), transparent 55%),
+    radial-gradient(100% 60% at 100% 100%, rgba(45,226,255,0.07), transparent 60%),
+    linear-gradient(rgba(61,49,112,0.10) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(61,49,112,0.10) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 44px 44px, 44px 44px;
+  background-attachment: fixed;
 }
 
-/* Tutorial spotlight + coach */
+/* CRT scanline overlay — subtle, sits above everything, never blocks input */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0,0,0,0)   0px,
+    rgba(0,0,0,0)   2px,
+    rgba(7,4,15,0.18) 3px,
+    rgba(7,4,15,0.18) 4px
+  );
+  mix-blend-mode: multiply;
+  opacity: 0.55;
+}
+
+/* ── Neon scrollbar + selection ───────────────────────────────────────────── */
+::selection { background: rgba(46,242,166,0.30); color: var(--color-snow); }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--color-paper); }
+::-webkit-scrollbar-thumb {
+  background: var(--color-wire);
+  border-radius: 0;
+  border: 2px solid var(--color-paper);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--color-iris); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ARCADE EFFECT LAYER — opt-in utility classes for components
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Chamfered "cabinet hardware" panel — clipped corners instead of rounded */
+.arcade-panel {
+  clip-path: polygon(
+    0 10px, 10px 0,
+    calc(100% - 10px) 0, 100% 10px,
+    100% calc(100% - 10px), calc(100% - 10px) 100%,
+    10px 100%, 0 calc(100% - 10px)
+  );
+}
+.arcade-clip-sm {
+  clip-path: polygon(
+    0 6px, 6px 0, calc(100% - 6px) 0, 100% 6px,
+    100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 6px)
+  );
+}
+
+/* Neon glow helpers (box + text). Pair with a colored border/text in markup. */
+.glow-mint   { box-shadow: 0 0 12px rgba(46,242,166,0.45), inset 0 0 8px rgba(46,242,166,0.12); }
+.glow-cyan   { box-shadow: 0 0 12px rgba(45,226,255,0.45), inset 0 0 8px rgba(45,226,255,0.12); }
+.glow-magenta{ box-shadow: 0 0 12px rgba(255,46,166,0.45), inset 0 0 8px rgba(255,46,166,0.12); }
+.glow-gold   { box-shadow: 0 0 12px rgba(255,201,60,0.45), inset 0 0 8px rgba(255,201,60,0.12); }
+.glow-iris   { box-shadow: 0 0 12px rgba(176,107,255,0.45), inset 0 0 8px rgba(176,107,255,0.12); }
+
+.text-glow      { text-shadow: 0 0 8px currentColor, 0 0 18px currentColor; }
+.text-glow-soft { text-shadow: 0 0 10px rgba(176,107,255,0.55); }
+
+/* ── Keyframes ────────────────────────────────────────────────────────────── */
+@keyframes neon-flicker {
+  0%, 100%   { opacity: 1; }
+  41%, 43%   { opacity: 1; }
+  42%        { opacity: 0.72; }
+  62%, 64%   { opacity: 1; }
+  63%        { opacity: 0.85; }
+}
+.anim-flicker { animation: neon-flicker 4.5s infinite steps(1, end); }
+
+@keyframes glow-pulse {
+  0%, 100% { filter: drop-shadow(0 0 3px currentColor); opacity: 0.92; }
+  50%      { filter: drop-shadow(0 0 12px currentColor); opacity: 1; }
+}
+.anim-pulse { animation: glow-pulse 2.4s ease-in-out infinite; }
+
+@keyframes scan-roll {
+  0%   { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+@keyframes grid-drift {
+  0%   { background-position: 0 0, 0 0; }
+  100% { background-position: 0 44px, 44px 0; }
+}
+
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.anim-marquee { animation: marquee 22s linear infinite; }
+
+/* ── Tutorial spotlight + coach (re-skinned to neon cyan) ─────────────────── */
 @keyframes tutorial-ring-pulse {
-  0%, 100% { box-shadow: 0 0 0 9999px rgba(7,10,18,0.55), 0 0 12px 1px rgba(200,150,60,0.45); }
-  50%      { box-shadow: 0 0 0 9999px rgba(7,10,18,0.55), 0 0 22px 4px rgba(200,150,60,0.85); }
+  0%, 100% { box-shadow: 0 0 0 9999px rgba(7,4,15,0.62), 0 0 14px 1px rgba(45,226,255,0.55); }
+  50%      { box-shadow: 0 0 0 9999px rgba(7,4,15,0.62), 0 0 26px 5px rgba(45,226,255,0.95); }
 }
 .tutorial-ring { animation: tutorial-ring-pulse 1.6s ease-in-out infinite; }
 
@@ -44,3 +155,11 @@ body {
   50%      { opacity: 0.4; transform: scale(0.7); }
 }
 .tutorial-pulse-dot { animation: tutorial-pulse-dot 1.2s ease-in-out infinite; }
+
+/* ── Respect reduced-motion ───────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .anim-flicker, .anim-pulse, .anim-marquee,
+  .tutorial-ring, .tutorial-pulse-dot {
+    animation: none !important;
+  }
+}

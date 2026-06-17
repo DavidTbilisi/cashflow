@@ -7,7 +7,7 @@ interface Props { history: PlayerHistoryPoint[] }
 
 export function NetWorthTrend({ history }: Props) {
   return (
-    <ChartCard title="Net Worth Trend">
+    <ChartCard title="Net Worth Trend" accent="var(--color-azure)">
       {history.length < 2 ? (
         <p
           style={{

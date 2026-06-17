@@ -6,7 +6,7 @@ interface Props { history: PlayerHistoryPoint[] }
 
 export function PassiveVsExpensesTrend({ history }: Props) {
   return (
-    <ChartCard title="Passive vs Expenses">
+    <ChartCard title="Passive vs Expenses" accent="var(--color-seafoam)">
       {history.length < 2 ? (
         <p
           style={{

@@ -19,7 +19,7 @@ export function ExpenseBreakdown({ player }: Props) {
       : []),
   ]
   return (
-    <ChartCard title="Expenses">
+    <ChartCard title="Expenses" accent="var(--color-flame)">
       <BarMeter bars={bars} />
     </ChartCard>
   )

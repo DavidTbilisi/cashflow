@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NEON EXCHANGE — Wealth Arcade Visual System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bruno+Ace+SC&family=Bruno+Ace&family=Chakra+Petch:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --ink:#07040F; --paper:#0E0A1E; --card:#15102A; --rim:#2A2150; --wire:#3D3170;
+  --fog:#8A7FB0; --mist:#B8AEDC; --snow:#F2ECFF;
+  --seafoam:#2EF2A6; --flame:#FF4D6D; --azure:#2DE2FF; --gold:#FFC93C; --iris:#B06BFF; --neon:#FF2EA6;
+  --display:'Bruno Ace SC','Chakra Petch',sans-serif;
+  --display-mc:'Bruno Ace','Chakra Petch',sans-serif;
+  --ui:'Chakra Petch',system-ui,sans-serif;
+  --data:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:var(--ui); color:var(--snow); background-color:var(--ink);
+  background-image:
+    radial-gradient(120% 70% at 50% -5%, rgba(176,107,255,0.14), transparent 55%),
+    radial-gradient(90% 60% at 100% 100%, rgba(45,226,255,0.10), transparent 60%),
+    radial-gradient(80% 50% at 0% 100%, rgba(255,46,166,0.08), transparent 60%);
+  -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  line-height:1.5;
+}
+/* perspective grid floor */
+body::before{
+  content:''; position:fixed; left:-25%; right:-25%; bottom:-10%; height:55vh; z-index:0;
+  background-image:
+    linear-gradient(rgba(176,107,255,0.22) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(45,226,255,0.18) 1px, transparent 1px);
+  background-size:60px 60px;
+  transform:perspective(380px) rotateX(64deg);
+  transform-origin:bottom center;
+  mask-image:linear-gradient(to top, #000 5%, transparent 80%);
+  -webkit-mask-image:linear-gradient(to top, #000 5%, transparent 80%);
+  animation:floor 8s linear infinite; pointer-events:none;
+}
+@keyframes floor{ from{background-position:0 0,0 0;} to{background-position:0 60px,60px 0;} }
+/* scanlines */
+body::after{
+  content:''; position:fixed; inset:0; z-index:9998; pointer-events:none;
+  background:repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0 2px, rgba(7,4,15,0.20) 3px 4px);
+  mix-blend-mode:multiply; opacity:.5;
+}
+.wrap{position:relative; z-index:1; max-width:1080px; margin:0 auto; padding:0 24px 120px;}
+
+::selection{background:rgba(46,242,166,0.30); color:var(--snow);}
+::-webkit-scrollbar{width:11px;}
+::-webkit-scrollbar-track{background:var(--paper);}
+::-webkit-scrollbar-thumb{background:var(--wire); border:2px solid var(--paper);}
+::-webkit-scrollbar-thumb:hover{background:var(--iris);}
+
+/* ── hardware panel shape ── */
+.clip{clip-path:polygon(0 10px,10px 0,calc(100% - 10px) 0,100% 10px,100% calc(100% - 10px),calc(100% - 10px) 100%,10px 100%,0 calc(100% - 10px));}
+.clip-sm{clip-path:polygon(0 6px,6px 0,calc(100% - 6px) 0,100% 6px,100% calc(100% - 6px),calc(100% - 6px) 100%,6px 100%,0 calc(100% - 6px));}
+
+/* ── animations ── */
+@keyframes flicker{0%,100%,41%,43%{opacity:1}42%{opacity:.7}62%,64%{opacity:1}63%{opacity:.85}}
+@keyframes pulse{0%,100%{filter:drop-shadow(0 0 3px currentColor);opacity:.9}50%{filter:drop-shadow(0 0 14px currentColor);opacity:1}}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+.flicker{animation:flicker 5s infinite steps(1,end);}
+.pulse{animation:pulse 2.4s ease-in-out infinite;}
+
+/* staggered reveal on load */
+section{opacity:0; animation:rise .7s cubic-bezier(.2,.8,.2,1) forwards;}
+section:nth-of-type(1){animation-delay:.05s} section:nth-of-type(2){animation-delay:.12s}
+section:nth-of-type(3){animation-delay:.19s} section:nth-of-type(4){animation-delay:.26s}
+section:nth-of-type(5){animation-delay:.33s} section:nth-of-type(6){animation-delay:.40s}
+section:nth-of-type(7){animation-delay:.47s} section:nth-of-type(8){animation-delay:.54s}
+section:nth-of-type(9){animation-delay:.61s}
+
+.text-glow{text-shadow:0 0 8px currentColor,0 0 20px currentColor;}
+
+/* ════════ HERO / MARQUEE ════════ */
+header{position:relative; z-index:1; padding:64px 24px 40px; text-align:center;}
+.eyebrow{font-family:var(--data); font-size:11px; letter-spacing:.5em; color:var(--azure); text-transform:uppercase; padding-left:.5em;}
+.title{
+  font-family:var(--display); font-size:clamp(38px,9vw,104px); line-height:.92;
+  letter-spacing:.02em; margin:14px 0 6px;
+  background:linear-gradient(180deg,#fff 0%,var(--iris) 55%,var(--neon) 100%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  filter:drop-shadow(0 2px 18px rgba(176,107,255,.55));
+}
+.subtitle{font-family:var(--data); font-size:13px; letter-spacing:.32em; color:var(--mist); text-transform:uppercase;}
+.coin{display:inline-block; color:var(--gold);}
+
+.marquee{
+  position:relative; margin:34px 0 0; overflow:hidden;
+  border-top:1px solid var(--rim); border-bottom:1px solid var(--rim);
+  background:linear-gradient(90deg, rgba(255,46,166,.06), rgba(45,226,255,.06));
+  padding:11px 0; white-space:nowrap;
+  mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+}
+.marquee .track{display:inline-block; animation:marquee 24s linear infinite;}
+.marquee span{font-family:var(--data); font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--fog); padding:0 22px;}
+.marquee b{color:var(--seafoam); font-weight:500;} .marquee i{color:var(--flame); font-style:normal;}
+
+/* ════════ SECTION SCAFFOLD ════════ */
+section{margin-top:64px;}
+.sec-head{display:flex; align-items:baseline; gap:14px; margin-bottom:22px;}
+.sec-num{font-family:var(--data); font-size:12px; color:var(--neon); letter-spacing:.1em;}
+.sec-title{font-family:var(--display-mc); font-weight:400; font-size:22px; letter-spacing:.04em; color:var(--snow);}
+.sec-rule{flex:1; height:1px; background:linear-gradient(90deg,var(--wire),transparent);}
+
+/* ════════ SWATCHES ════════ */
+.swatches{display:grid; grid-template-columns:repeat(auto-fill,minmax(132px,1fr)); gap:12px;}
+.sw{
+  border:1px solid var(--rim); background:var(--card); padding:0; overflow:hidden;
+}
+.sw .chip{height:64px; position:relative;}
+.sw .meta{padding:9px 11px;}
+.sw .name{font-family:var(--display-mc); font-size:12px; letter-spacing:.04em; text-transform:uppercase;}
+.sw .hex{font-family:var(--data); font-size:10px; color:var(--fog); margin-top:2px;}
+.sw .role{font-family:var(--ui); font-size:10px; color:var(--mist); margin-top:5px; line-height:1.35;}
+
+/* ════════ TYPE SCALE ════════ */
+.panel{background:var(--paper); border:1px solid var(--rim); padding:24px;}
+.type-row{padding:16px 0; border-bottom:1px dashed var(--rim);}
+.type-row:last-child{border-bottom:none;}
+.type-tag{font-family:var(--data); font-size:10px; color:var(--fog); letter-spacing:.18em; text-transform:uppercase; display:block; margin-bottom:7px;}
+
+/* ════════ BUTTONS ════════ */
+.btn-grid{display:flex; flex-wrap:wrap; gap:14px; align-items:center;}
+.btn{
+  font-family:var(--ui); font-weight:600; font-size:13px; letter-spacing:.14em; text-transform:uppercase;
+  padding:13px 26px; border:none; cursor:pointer; color:var(--ink);
+  transition:transform .12s ease, box-shadow .2s ease, filter .2s ease;
+  clip-path:polygon(0 6px,6px 0,calc(100% - 6px) 0,100% 6px,100% calc(100% - 6px),calc(100% - 6px) 100%,6px 100%,0 calc(100% - 6px));
+}
+.btn:hover{transform:translateY(-2px); filter:brightness(1.08);}
+.btn:active{transform:translateY(0);}
+.btn-mint{background:var(--seafoam); box-shadow:0 0 16px rgba(46,242,166,.5);}
+.btn-mint:hover{box-shadow:0 0 26px rgba(46,242,166,.8);}
+.btn-cyan{background:var(--azure); box-shadow:0 0 16px rgba(45,226,255,.5);}
+.btn-cyan:hover{box-shadow:0 0 26px rgba(45,226,255,.8);}
+.btn-gold{background:var(--gold); box-shadow:0 0 16px rgba(255,201,60,.5);}
+.btn-gold:hover{box-shadow:0 0 26px rgba(255,201,60,.8);}
+.btn-ghost{
+  background:transparent; color:var(--mist); border:1px solid var(--wire);
+  box-shadow:inset 0 0 0 rgba(0,0,0,0);
+}
+.btn-ghost:hover{color:var(--snow); border-color:var(--iris); box-shadow:0 0 16px rgba(176,107,255,.4), inset 0 0 12px rgba(176,107,255,.12);}
+.btn-disabled{background:var(--rim); color:var(--fog); cursor:not-allowed; box-shadow:none;}
+.btn-disabled:hover{transform:none; filter:none;}
+.kbd{font-family:var(--data); font-size:10px; background:rgba(7,4,15,.35); border:1px solid rgba(7,4,15,.4); padding:1px 5px; margin-left:9px; border-radius:2px; vertical-align:middle;}
+
+/* ════════ GRID HELPERS ════════ */
+.cols-2{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+.cols-3{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+@media(max-width:720px){.cols-2,.cols-3{grid-template-columns:1fr;}}
+
+/* ════════ MONEY READOUT ════════ */
+.readout{background:var(--card); border:1px solid var(--rim); padding:18px 20px;}
+.readout .lbl{font-family:var(--data); font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--fog);}
+.readout .num{font-family:var(--data); font-size:30px; font-weight:600; margin-top:4px; letter-spacing:-.01em;}
+.pos{color:var(--seafoam);} .neg{color:var(--flame);} .info{color:var(--azure);} .warn{color:var(--gold);}
+
+/* ════════ DEAL CARD ════════ */
+.deal{
+  position:relative; background:var(--card); border:1px solid var(--rim); padding:0; overflow:hidden;
+}
+.deal .accent{height:3px;}
+.deal .body{padding:20px;}
+.badge{
+  display:inline-block; font-family:var(--data); font-size:10px; font-weight:600; letter-spacing:.22em;
+  text-transform:uppercase; padding:4px 9px; border-radius:2px;
+}
+.deal h3{font-family:var(--display-mc); font-weight:400; font-size:19px; margin:14px 0 8px; letter-spacing:.02em; line-height:1.15;}
+.deal p{font-size:13px; color:var(--mist); margin-bottom:16px;}
+.statline{display:flex; justify-content:space-between; font-family:var(--data); font-size:12px; padding:5px 0; border-top:1px dashed var(--rim);}
+.statline .k{color:var(--fog);}
+
+/* ════════ GAUGE ════════ */
+.gauge-lbl{display:flex; justify-content:space-between; font-family:var(--data); font-size:11px; letter-spacing:.06em; margin-bottom:8px;}
+.gauge{height:18px; background:var(--ink); border:1px solid var(--rim); position:relative; overflow:hidden;}
+.gauge .fill{height:100%; position:relative;}
+.gauge .fill::after{content:''; position:absolute; inset:0; background:repeating-linear-gradient(90deg,rgba(255,255,255,.18) 0 2px,transparent 2px 7px);}
+.gauge-cap{font-family:var(--data); font-size:10px; color:var(--fog); margin-top:6px;}
+
+/* ════════ ESBI QUADRANT ════════ */
+.esbi{display:grid; grid-template-columns:1fr 1fr; gap:6px; max-width:300px;}
+.q{aspect-ratio:1.7; border:1px solid var(--rim); background:var(--card); display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; overflow:hidden;}
+.q .letter{font-family:var(--display); font-size:34px; line-height:1;}
+.q .qname{font-family:var(--data); font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--fog); margin-top:5px;}
+.q.active{box-shadow:inset 0 0 24px rgba(46,242,166,.18); border-color:var(--seafoam);}
+
+/* ════════ BOARD TRACK ════════ */
+.track{display:flex; gap:5px; flex-wrap:wrap;}
+.cell{width:30px; height:30px; border:1px solid var(--rim); background:var(--card); display:flex; align-items:center; justify-content:center; font-size:13px; transition:.2s;}
+.cell.you{border-color:var(--seafoam); box-shadow:0 0 12px rgba(46,242,166,.6); background:rgba(46,242,166,.08);}
+.cell.deal{border-color:var(--azure);} .cell.event{border-color:var(--gold);} .cell.doodad{border-color:var(--flame);}
+
+/* ════════ BAR METER ════════ */
+.bar{height:13px; display:flex; background:var(--ink); border:1px solid var(--rim); overflow:hidden;}
+.bar i{height:100%;}
+.legend{display:flex; gap:16px; flex-wrap:wrap; margin-top:11px;}
+.legend span{font-family:var(--data); font-size:11px; color:var(--mist); display:flex; align-items:center; gap:6px;}
+.dot{width:9px; height:9px; display:inline-block;}
+
+/* ════════ MODAL DEMO ════════ */
+.modal{max-width:380px; background:var(--card); border:1px solid var(--rim); overflow:hidden; box-shadow:0 24px 60px rgba(0,0,0,.6), 0 0 40px rgba(176,107,255,.18);}
+.modal .accent{height:3px; background:var(--iris);}
+.modal .inner{padding:24px;}
+
+footer{margin-top:90px; text-align:center; font-family:var(--data); font-size:11px; letter-spacing:.2em; color:var(--fog); text-transform:uppercase;}
+.foot-coin{color:var(--gold);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Cashflow · Visual System v1.0</div>
+  <h1 class="title flicker">NEON&nbsp;EXCHANGE</h1>
+  <div class="subtitle">Wealth&nbsp;Arcade&nbsp;<span class="coin">◆</span>&nbsp;198X</div>
+  <div class="marquee">
+    <div class="track">
+      <span>★ INSERT&nbsp;COIN&nbsp;TO&nbsp;PLAY</span><span>PASSIVE&nbsp;INCOME&nbsp;<b>+$4,200/MO</b></span><span>RAT&nbsp;RACE&nbsp;<i>ESCAPE&nbsp;PENDING</i></span><span>SIX&nbsp;ANCHORS&nbsp;<b>3/6</b></span><span>NET&nbsp;WORTH&nbsp;<b>$182,400</b></span><span>★ HIGH&nbsp;SCORE&nbsp;BEAT</span>
+      <span>★ INSERT&nbsp;COIN&nbsp;TO&nbsp;PLAY</span><span>PASSIVE&nbsp;INCOME&nbsp;<b>+$4,200/MO</b></span><span>RAT&nbsp;RACE&nbsp;<i>ESCAPE&nbsp;PENDING</i></span><span>SIX&nbsp;ANCHORS&nbsp;<b>3/6</b></span><span>NET&nbsp;WORTH&nbsp;<b>$182,400</b></span><span>★ HIGH&nbsp;SCORE&nbsp;BEAT</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- 01 PALETTE -->
+  <section>
+    <div class="sec-head"><span class="sec-num">01</span><h2 class="sec-title">Palette</h2><div class="sec-rule"></div></div>
+    <div class="swatches">
+      <div class="sw clip-sm"><div class="chip" style="background:var(--ink)"></div><div class="meta"><div class="name">Ink</div><div class="hex">#07040F</div><div class="role">Void · page base · text on neon</div></div></div>
+      <div class="sw clip-sm"><div class="chip" style="background:var(--paper)"></div><div class="meta"><div class="name">Paper</div><div class="hex">#0E0A1E</div><div class="role">Panels & surfaces</div></div></div>
+      <div class="sw clip-sm"><div class="chip" style="background:var(--card)"></div><div class="meta"><div class="name">Card</div><div class="hex">#15102A</div><div class="role">Cards & modals</div></div></div>
+      <div class="sw clip-sm"><div class="chip" style="background:var(--wire)"></div><div class="meta"><div class="name">Wire</div><div class="hex">#3D3170</div><div class="role">Borders · grid · disabled</div></div></div>
+      <div class="sw clip-sm"><div class="chip" style="background:var(--mist)"></div><div class="meta"><div class="name">Mist</div><div class="hex">#B8AEDC</div><div class="role">Body text</div></div></div>
+      <div class="sw clip-sm"><div class="chip" style="background:var(--snow)"></div><div class="meta"><div class="name">Snow</div><div class="hex">#F2ECFF</div><div class="role">Primary text</div></div></div>
+      <div class="sw clip-sm"><div class="chip" style="background:var(--seafoam);box-shadow:inset 0 0 22px rgba(46,242,166,.5)"></div><div class="meta"><div class="name" style="color:var(--seafoam)">Seafoam</div><div class="hex">#2EF2A6</div><div class="role">Positive money · primary</div></div></div>
+      <div class="sw clip-sm"><div class="chip" style="background:var(--flame);box-shadow:inset 0 0 22px rgba(255,77,109,.5)"></div><div class="meta"><div class="name" style="color:var(--flame)">Flame</div><div class="hex">#FF4D6D</div><div class="role">Negative money · danger</div></div></div>
+      <div class="sw clip-sm"><div class="chip" style="background:var(--azure);box-shadow:inset 0 0 22px rgba(45,226,255,.5)"></div><div class="meta"><div class="name" style="color:var(--azure)">Azure</div><div class="hex">#2DE2FF</div><div class="role">Passive income · info</div></div></div>
+      <div class="sw clip-sm"><div class="chip" style="background:var(--gold);box-shadow:inset 0 0 22px rgba(255,201,60,.5)"></div><div class="meta"><div class="name" style="color:var(--gold)">Gold</div><div class="hex">#FFC93C</div><div class="role">Premium · wealth · hero</div></div></div>
+      <div class="sw clip-sm"><div class="chip" style="background:var(--iris);box-shadow:inset 0 0 22px rgba(176,107,255,.5)"></div><div class="meta"><div class="name" style="color:var(--iris)">Iris</div><div class="hex">#B06BFF</div><div class="role">Special · systems</div></div></div>
+      <div class="sw clip-sm"><div class="chip" style="background:var(--neon);box-shadow:inset 0 0 22px rgba(255,46,166,.5)"></div><div class="meta"><div class="name" style="color:var(--neon)">Neon</div><div class="hex">#FF2EA6</div><div class="role">Arcade signature accent</div></div></div>
+    </div>
+  </section>
+
+  <!-- 02 TYPOGRAPHY -->
+  <section>
+    <div class="sec-head"><span class="sec-num">02</span><h2 class="sec-title">Typography</h2><div class="sec-rule"></div></div>
+    <div class="panel clip">
+      <div class="type-row">
+        <span class="type-tag">Display · Bruno Ace SC · headers, hero, badges</span>
+        <div style="font-family:var(--display); font-size:40px; letter-spacing:.03em; line-height:1;">FINANCIAL FREEDOM</div>
+      </div>
+      <div class="type-row">
+        <span class="type-tag">Display alt · Bruno Ace · section titles</span>
+        <div style="font-family:var(--display-mc); font-size:26px;">Escape the Rat Race</div>
+      </div>
+      <div class="type-row">
+        <span class="type-tag">UI · Chakra Petch · labels & body</span>
+        <div style="font-family:var(--ui); font-size:16px; color:var(--mist); max-width:620px;">Buy assets that pay you. When passive income clears your monthly expenses, you win your freedom — pass the CENTS test and your business sells itself.</div>
+      </div>
+      <div class="type-row">
+        <span class="type-tag">Data · JetBrains Mono · all numbers & ledgers</span>
+        <div style="font-family:var(--data); font-size:20px; letter-spacing:.02em;">
+          <span class="pos">+$4,200</span> &nbsp; <span class="neg">−$1,850</span> &nbsp; <span class="info">$182,400</span> &nbsp; <span style="color:var(--fog)">0.00%</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 BUTTONS -->
+  <section>
+    <div class="sec-head"><span class="sec-num">03</span><h2 class="sec-title">Controls</h2><div class="sec-rule"></div></div>
+    <div class="panel clip">
+      <div class="btn-grid">
+        <button class="btn btn-mint">Roll Dice<span class="kbd">R</span></button>
+        <button class="btn btn-cyan">Buy Asset<span class="kbd">B</span></button>
+        <button class="btn btn-gold">Move to Fast Track</button>
+        <button class="btn btn-ghost">End Turn<span class="kbd">↵</span></button>
+        <button class="btn btn-disabled" disabled>Not Enough Cash</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 MONEY READOUTS -->
+  <section>
+    <div class="sec-head"><span class="sec-num">04</span><h2 class="sec-title">Money Readouts</h2><div class="sec-rule"></div></div>
+    <div class="cols-3">
+      <div class="readout clip-sm"><div class="lbl">Cash Balance</div><div class="num info">$24,800</div></div>
+      <div class="readout clip-sm"><div class="lbl">Cash Flow / mo</div><div class="num pos">+$2,350</div></div>
+      <div class="readout clip-sm"><div class="lbl">Total Expenses</div><div class="num neg">−$1,850</div></div>
+    </div>
+  </section>
+
+  <!-- 05 GAUGES -->
+  <section>
+    <div class="sec-head"><span class="sec-num">05</span><h2 class="sec-title">Freedom &amp; Progress Gauges</h2><div class="sec-rule"></div></div>
+    <div class="cols-2">
+      <div class="panel clip-sm">
+        <div class="gauge-lbl"><span style="color:var(--mist)">FREEDOM GAUGE</span><span class="pos">112%</span></div>
+        <div class="gauge"><div class="fill" style="width:100%; background:var(--seafoam); box-shadow:0 0 16px rgba(46,242,166,.7)"></div></div>
+        <div class="gauge-cap">Passive income clears expenses — <span class="pos">FINANCIAL FREEDOM</span></div>
+      </div>
+      <div class="panel clip-sm">
+        <div class="gauge-lbl"><span style="color:var(--mist)">SIX ANCHORS</span><span class="warn">3 / 6</span></div>
+        <div class="gauge"><div class="fill" style="width:50%; background:var(--gold); box-shadow:0 0 16px rgba(255,201,60,.6)"></div></div>
+        <div class="gauge-cap">Halfway to the win condition</div>
+      </div>
+      <div class="panel clip-sm">
+        <div class="gauge-lbl"><span style="color:var(--mist)">SOCIAL CAPITAL</span><span class="info">7 SC</span></div>
+        <div class="gauge"><div class="fill" style="width:35%; background:var(--azure); box-shadow:0 0 16px rgba(45,226,255,.6)"></div></div>
+        <div class="gauge-cap">Pull strings to bend the board</div>
+      </div>
+      <div class="panel clip-sm">
+        <div class="gauge-lbl"><span style="color:var(--mist)">TIME FREEDOM</span><span class="neg">22%</span></div>
+        <div class="gauge"><div class="fill" style="width:22%; background:var(--flame); box-shadow:0 0 16px rgba(255,77,109,.5)"></div></div>
+        <div class="gauge-cap">Below 50% — still trading hours for dollars</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 DEAL CARDS -->
+  <section>
+    <div class="sec-head"><span class="sec-num">06</span><h2 class="sec-title">Opportunity Cards</h2><div class="sec-rule"></div></div>
+    <div class="cols-3">
+      <div class="deal clip-sm">
+        <div class="accent" style="background:var(--azure)"></div>
+        <div class="body">
+          <span class="badge" style="background:rgba(45,226,255,.12); color:var(--azure); border:1px solid rgba(45,226,255,.35)">Small Deal</span>
+          <h3>3-Bed / 2-Bath Rental</h3>
+          <p>Tidy duplex in an up-and-coming block. Tenants cover the note with room to spare.</p>
+          <div class="statline"><span class="k">Down payment</span><span class="neg">−$4,000</span></div>
+          <div class="statline"><span class="k">Cash flow / mo</span><span class="pos">+$320</span></div>
+        </div>
+      </div>
+      <div class="deal clip-sm">
+        <div class="accent" style="background:var(--gold)"></div>
+        <div class="body">
+          <span class="badge" style="background:rgba(255,201,60,.12); color:var(--gold); border:1px solid rgba(255,201,60,.35)">Big Deal</span>
+          <h3>32-Unit Apartment</h3>
+          <p>A serious asset. Heavy down, but the monthly flow rewrites your whole statement.</p>
+          <div class="statline"><span class="k">Down payment</span><span class="neg">−$48,000</span></div>
+          <div class="statline"><span class="k">Cash flow / mo</span><span class="pos">+$2,400</span></div>
+        </div>
+      </div>
+      <div class="deal clip-sm">
+        <div class="accent" style="background:var(--iris)"></div>
+        <div class="body">
+          <span class="badge" style="background:rgba(176,107,255,.12); color:var(--iris); border:1px solid rgba(176,107,255,.35)">System</span>
+          <h3>CENTS Test · Self-Selling</h3>
+          <p>Control, Entry, Need, Time, Scale. Pass 4 of 5 and the asset works without you.</p>
+          <div class="statline"><span class="k">Threshold</span><span class="info">4 / 5</span></div>
+          <div class="statline"><span class="k">Status</span><span class="pos">PASSED</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 ESBI + BOARD -->
+  <section>
+    <div class="sec-head"><span class="sec-num">07</span><h2 class="sec-title">ESBI Quadrant &amp; Board</h2><div class="sec-rule"></div></div>
+    <div class="cols-2">
+      <div class="panel clip">
+        <div class="type-tag" style="margin-bottom:14px">Cashflow Quadrant — your current zone glows</div>
+        <div class="esbi">
+          <div class="q"><span class="letter" style="color:var(--fog)">E</span><span class="qname">Employee</span></div>
+          <div class="q"><span class="letter" style="color:var(--mist)">S</span><span class="qname">Self-Empl.</span></div>
+          <div class="q active"><span class="letter pulse" style="color:var(--seafoam)">B</span><span class="qname" style="color:var(--seafoam)">Business</span></div>
+          <div class="q"><span class="letter" style="color:var(--gold)">I</span><span class="qname">Investor</span></div>
+        </div>
+      </div>
+      <div class="panel clip">
+        <div class="type-tag" style="margin-bottom:14px">Rat Race track — ◆ marks your token</div>
+        <div class="track">
+          <div class="cell deal">$</div><div class="cell">·</div><div class="cell event">!</div>
+          <div class="cell you pulse" style="color:var(--seafoam)">◆</div><div class="cell">·</div>
+          <div class="cell doodad">✦</div><div class="cell deal">$</div><div class="cell">·</div>
+          <div class="cell">·</div><div class="cell event">!</div><div class="cell">·</div>
+          <div class="cell deal">$</div><div class="cell">·</div><div class="cell doodad">✦</div>
+        </div>
+        <div class="legend">
+          <span><i class="dot" style="background:var(--azure)"></i>Deal</span>
+          <span><i class="dot" style="background:var(--gold)"></i>Event</span>
+          <span><i class="dot" style="background:var(--flame)"></i>Doodad</span>
+          <span><i class="dot" style="background:var(--seafoam)"></i>You</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 08 CHART -->
+  <section>
+    <div class="sec-head"><span class="sec-num">08</span><h2 class="sec-title">Data — Income Mix</h2><div class="sec-rule"></div></div>
+    <div class="panel clip">
+      <div class="type-tag" style="margin-bottom:12px">Monthly income by source</div>
+      <div class="bar">
+        <i style="width:46%; background:var(--seafoam)"></i>
+        <i style="width:30%; background:var(--azure)"></i>
+        <i style="width:16%; background:var(--iris)"></i>
+        <i style="width:8%;  background:var(--gold)"></i>
+      </div>
+      <div class="legend">
+        <span><i class="dot" style="background:var(--seafoam)"></i>Real estate · $2,400</span>
+        <span><i class="dot" style="background:var(--azure)"></i>Dividends · $1,560</span>
+        <span><i class="dot" style="background:var(--iris)"></i>Business · $830</span>
+        <span><i class="dot" style="background:var(--gold)"></i>Royalties · $410</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 09 MODAL -->
+  <section>
+    <div class="sec-head"><span class="sec-num">09</span><h2 class="sec-title">Modal / Prompt</h2><div class="sec-rule"></div></div>
+    <div class="modal clip">
+      <div class="accent"></div>
+      <div class="inner">
+        <span class="badge" style="background:rgba(176,107,255,.12); color:var(--iris); border:1px solid rgba(176,107,255,.35)">Opportunity</span>
+        <h2 style="font-family:var(--display-mc); font-weight:400; font-size:24px; margin:16px 0 10px; letter-spacing:.02em;">Choose Your Deal</h2>
+        <p style="color:var(--mist); font-size:14px; margin-bottom:18px;">Which kind of opportunity do you want to draw this turn?</p>
+        <div style="display:flex; gap:12px;">
+          <button class="btn btn-ghost" style="flex:1">Decline<span class="kbd">Esc</span></button>
+          <button class="btn btn-mint" style="flex:1">Draw Deal<span class="kbd">↵</span></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  Neon Exchange <span class="foot-coin">◆</span> Wealth Arcade Visual System <span class="foot-coin">◆</span> tokens live in <span style="font-family:var(--data); color:var(--mist)">src/index.css</span>
+</footer>
+
+</body>
+</html>

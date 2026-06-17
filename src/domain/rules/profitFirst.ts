@@ -37,6 +37,38 @@ export function currentQuarter(round: number): number {
 }
 
 /**
+ * The in-game calendar clock. One round = one month, so the game's existing
+ * time scale (3 rounds = 1 quarter) reads as 3 months = 1 quarter, 12 = 1 year.
+ * Derived from QUARTER_ROUNDS so the calendar follows if the clock is retuned.
+ */
+export const MONTHS_PER_QUARTER = QUARTER_ROUNDS
+export const QUARTERS_PER_YEAR = 4
+export const MONTHS_PER_YEAR = MONTHS_PER_QUARTER * QUARTERS_PER_YEAR
+
+export interface GameTime {
+  /** 1-based total months elapsed (one per round). */
+  month: number
+  /** 1-based calendar year. */
+  year: number
+  /** 1-based quarter within the year (1..QUARTERS_PER_YEAR). */
+  quarter: number
+  /** 1-based month within the year (1..MONTHS_PER_YEAR). */
+  monthOfYear: number
+  /** Compact display label, e.g. "Year 2 · Q2 · Month 5". */
+  label: string
+}
+
+/** Convert the global round counter into an in-game calendar (1 round = 1 month). */
+export function gameTime(round: number): GameTime {
+  const month = Math.max(1, Math.floor(round))
+  const idx = month - 1
+  const year = Math.floor(idx / MONTHS_PER_YEAR) + 1
+  const monthOfYear = (idx % MONTHS_PER_YEAR) + 1
+  const quarter = Math.floor((monthOfYear - 1) / MONTHS_PER_QUARTER) + 1
+  return { month, year, quarter, monthOfYear, label: `Year ${year} · Q${quarter} · Month ${monthOfYear}` }
+}
+
+/**
  * Allocate one payday. Positive income is skimmed Profit-first into the sealed
  * envelopes; only the remainder lands in spendable cash. A non-positive payday
  * (negative cash flow) has nothing to skim — it hits the operating account in full.

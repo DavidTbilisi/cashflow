@@ -5,9 +5,11 @@ import {
   absorbLoss,
   sealedReserve,
   currentQuarter,
+  gameTime,
   PROFIT_TAP,
   TAX_TAP,
   QUARTER_ROUNDS,
+  MONTHS_PER_YEAR,
 } from '../../domain/rules/profitFirst'
 import { computeSummary, applyCardEffect } from '../../domain/services/financialCalc'
 import { evaluateAnchors } from '../../domain/rules/anchorRules'
@@ -75,6 +77,32 @@ describe('currentQuarter — the round clock', () => {
     expect(currentQuarter(1)).toBe(0)
     expect(currentQuarter(QUARTER_ROUNDS)).toBe(1)
     expect(currentQuarter(QUARTER_ROUNDS * 2)).toBe(2)
+  })
+})
+
+describe('gameTime — the in-game calendar', () => {
+  it('starts at Year 1, Q1, Month 1 on round 1', () => {
+    expect(gameTime(1)).toMatchObject({ year: 1, quarter: 1, monthOfYear: 1, month: 1 })
+  })
+
+  it('one round = one month', () => {
+    expect(gameTime(5).month).toBe(5)
+    expect(gameTime(5).monthOfYear).toBe(5)
+  })
+
+  it('groups months into quarters of MONTHS_PER_QUARTER', () => {
+    expect(gameTime(QUARTER_ROUNDS).quarter).toBe(1)       // last month of Q1
+    expect(gameTime(QUARTER_ROUNDS + 1).quarter).toBe(2)   // first month of Q2
+  })
+
+  it('rolls over to the next year after MONTHS_PER_YEAR rounds', () => {
+    expect(gameTime(MONTHS_PER_YEAR)).toMatchObject({ year: 1, monthOfYear: MONTHS_PER_YEAR })
+    expect(gameTime(MONTHS_PER_YEAR + 1)).toMatchObject({ year: 2, quarter: 1, monthOfYear: 1 })
+  })
+
+  it('clamps non-positive rounds to month 1 and builds a readable label', () => {
+    expect(gameTime(0).month).toBe(1)
+    expect(gameTime(MONTHS_PER_YEAR + 5).label).toBe('Year 2 · Q2 · Month 5')
   })
 })
 

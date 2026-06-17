@@ -20,7 +20,7 @@ export function AssetClassMix({ player }: Props) {
     })),
   ]
   return (
-    <ChartCard title="Asset Mix">
+    <ChartCard title="Asset Mix" accent="var(--color-iris)">
       <BarMeter bars={bars} />
     </ChartCard>
   )

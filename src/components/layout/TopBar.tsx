@@ -17,8 +17,9 @@ export function TopBar() {
     <div
       className="h-12 flex items-center px-4 gap-4 flex-shrink-0"
       style={{
-        background: 'var(--color-paper)',
-        borderBottom: '1px solid var(--color-rim)',
+        background: 'linear-gradient(180deg, var(--color-card), var(--color-paper))',
+        borderBottom: '1px solid var(--color-iris)',
+        boxShadow: '0 1px 14px rgba(176,107,255,0.30)',
       }}
     >
       <span
@@ -42,12 +43,12 @@ export function TopBar() {
           return (
             <div
               key={p.id}
-              className="flex items-center gap-1.5 px-2.5 py-1 text-xs transition-all"
+              className="arcade-clip-sm flex items-center gap-1.5 px-2.5 py-1 text-xs transition-all"
               style={{
-                background: isActive ? 'var(--color-wire)' : 'transparent',
-                border: `1px solid ${isActive ? 'var(--color-mist)' : 'var(--color-rim)'}`,
-                borderRadius: '3px',
-                opacity: isActive ? 1 : 0.45,
+                background: isActive ? 'rgba(46,242,166,0.10)' : 'transparent',
+                border: `1px solid ${isActive ? 'var(--color-seafoam)' : 'var(--color-rim)'}`,
+                boxShadow: isActive ? '0 0 14px rgba(46,242,166,0.35)' : 'none',
+                opacity: isActive ? 1 : 0.4,
               }}
             >
               <span
@@ -68,9 +69,10 @@ export function TopBar() {
           <InfoLabel info={TERM_INFO.netWorth}>Net Worth</InfoLabel>{' '}
           <span
             style={{
-              color: 'var(--color-snow)',
+              color: 'var(--color-azure)',
               fontFamily: 'var(--font-data)',
               fontWeight: 600,
+              textShadow: '0 0 10px rgba(45,226,255,0.55)',
             }}
           >
             {formatShort(summary.netWorth)}

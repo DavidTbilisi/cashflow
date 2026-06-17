@@ -6,7 +6,7 @@ interface Props { player: PlayerState }
 
 export function AnchorSnapshot({ player }: Props) {
   return (
-    <ChartCard title="Six Anchors">
+    <ChartCard title="Six Anchors" accent="var(--color-neon)">
       <AnchorProgressBar player={player} />
     </ChartCard>
   )

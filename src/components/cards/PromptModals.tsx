@@ -19,13 +19,17 @@ function ModalShell({ accent, label, title, children }: { accent: string; label:
         exit={{ opacity: 0 }}
       >
         <motion.div
-          className="max-w-sm w-full mx-4 overflow-hidden shadow-2xl"
-          style={{ background: 'var(--color-card)', border: '1px solid var(--color-rim)', borderRadius: '4px' }}
+          className="arcade-panel max-w-sm w-full mx-4 overflow-hidden"
+          style={{
+            background: 'var(--color-card)',
+            border: `1px solid ${accent}55`,
+            boxShadow: `0 24px 60px rgba(0,0,0,0.6), 0 0 44px ${accent}33`,
+          }}
           initial={{ scale: 0.87, y: 18 }}
           animate={{ scale: 1, y: 0 }}
           transition={{ type: 'spring', stiffness: 380, damping: 28 }}
         >
-          <div className="h-0.5" style={{ background: accent }} />
+          <div className="h-[3px]" style={{ background: accent, boxShadow: `0 0 12px ${accent}` }} />
           <div className="p-6">
             <div className="mb-4">
               <span
@@ -51,12 +55,12 @@ function PrimaryBtn({ onClick, disabled, color, hint, children }: { onClick: () 
     <button
       onClick={onClick}
       disabled={disabled}
-      className="flex-1 py-2.5 text-sm font-semibold transition-opacity hover:opacity-90"
+      className="arcade-clip-sm flex-1 py-2.5 text-sm font-semibold uppercase tracking-[0.12em] transition-all hover:brightness-110"
       style={{
         background: disabled ? 'var(--color-rim)' : color,
         color: disabled ? 'var(--color-fog)' : 'var(--color-ink)',
-        borderRadius: '3px',
         border: 'none',
+        boxShadow: disabled ? 'none' : `0 0 16px ${color}66`,
         cursor: disabled ? 'not-allowed' : 'pointer',
       }}
     >
@@ -69,10 +73,10 @@ function GhostBtn({ onClick, hint, children }: { onClick: () => void; hint?: str
   return (
     <button
       onClick={onClick}
-      className="flex-1 py-2.5 text-sm font-medium transition-all"
-      style={{ border: '1px solid var(--color-rim)', color: 'var(--color-mist)', borderRadius: '3px', background: 'transparent', cursor: 'pointer' }}
-      onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--color-rim)' }}
-      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
+      className="arcade-clip-sm flex-1 py-2.5 text-sm font-medium uppercase tracking-[0.12em] transition-all"
+      style={{ border: '1px solid var(--color-wire)', color: 'var(--color-mist)', background: 'transparent', cursor: 'pointer' }}
+      onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(176,107,255,0.10)'; e.currentTarget.style.borderColor = 'var(--color-iris)'; e.currentTarget.style.color = 'var(--color-snow)'; e.currentTarget.style.boxShadow = '0 0 16px rgba(176,107,255,0.35)' }}
+      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'var(--color-wire)'; e.currentTarget.style.color = 'var(--color-mist)'; e.currentTarget.style.boxShadow = 'none' }}
     >
       {children}{hint && <KbdHint k={hint} />}
     </button>
@@ -95,11 +99,11 @@ export function DealChooser() {
     </button>
   )
   return (
-    <ModalShell accent="#9bbb4c" label="Opportunity" title="Choose Your Deal">
+    <ModalShell accent="#2EF2A6" label="Opportunity" title="Choose Your Deal">
       <p className="text-sm mb-4" style={{ color: 'var(--color-mist)' }}>Which kind of opportunity do you want to draw?</p>
       <div className="flex flex-col gap-2">
-        <Card size="small" color="#5B8FF9" title={<>Small Deal{smallBadge && <KbdHint k={smallBadge} />}</>} sub="Stocks & small real estate · ≤ $5,000 to get in" />
-        <Card size="big" color="#C8963C" title={<>Big Deal{bigBadge && <KbdHint k={bigBadge} />}</>} sub="Apartments & businesses · $6,000+ to get in" />
+        <Card size="small" color="#2DE2FF" title={<>Small Deal{smallBadge && <KbdHint k={smallBadge} />}</>} sub="Stocks & small real estate · ≤ $5,000 to get in" />
+        <Card size="big" color="#FFC93C" title={<>Big Deal{bigBadge && <KbdHint k={bigBadge} />}</>} sub="Apartments & businesses · $6,000+ to get in" />
       </div>
     </ModalShell>
   )
@@ -117,14 +121,14 @@ export function CharityModal() {
   const tithe = Math.round(computeSummary(player.finances).totalMonthlyIncome * 0.1)
   const ratRace = player.boardTrack === 'rat_race'
   return (
-    <ModalShell accent="#d9799f" label="Charity" title="Give to Charity?">
+    <ModalShell accent="#FF2EA6" label="Charity" title="Give to Charity?">
       <p className="text-sm mb-4" style={{ color: 'var(--color-mist)' }}>
         Donate 10% of your total income ({formatCurrency(tithe)}){' '}
         {ratRace ? 'to roll two dice on each of your next 3 turns.' : 'to choose how many dice you roll for the rest of the game.'}
       </p>
       <div className="flex gap-2">
         <GhostBtn onClick={decline} hint={dismissBadge}>Decline</GhostBtn>
-        <PrimaryBtn onClick={accept} disabled={player.finances.cashBalance < tithe} color="#d9799f" hint={primaryBadge}>
+        <PrimaryBtn onClick={accept} disabled={player.finances.cashBalance < tithe} color="#FF2EA6" hint={primaryBadge}>
           {player.finances.cashBalance < tithe ? 'Not enough cash' : `Donate ${formatCurrency(tithe)}`}
         </PrimaryBtn>
       </div>
@@ -142,7 +146,7 @@ export function MarketModal() {
   const { activeCard: card, marketOffer: offers } = game
   const player = game.players[game.currentPlayerIndex]
   return (
-    <ModalShell accent="#2DD4BF" label="The Market" title={card.title}>
+    <ModalShell accent="#1FE0C4" label="The Market" title={card.title}>
       <p className="text-sm mb-4" style={{ color: 'var(--color-mist)' }}>{card.description}</p>
       <div className="flex flex-col gap-2 mb-3">
         {(offers ?? []).map((o) => {
@@ -153,7 +157,7 @@ export function MarketModal() {
               key={o.assetId}
               onClick={() => sell(o.assetId)}
               className="w-full flex items-center justify-between p-3 transition-all hover:opacity-90"
-              style={{ background: 'rgba(45,212,191,0.10)', border: '1px solid rgba(45,212,191,0.4)', borderRadius: '3px', cursor: 'pointer' }}
+              style={{ background: 'rgba(31,224,196,0.10)', border: '1px solid rgba(31,224,196,0.4)', borderRadius: '3px', cursor: 'pointer' }}
             >
               <span className="text-sm font-medium" style={{ color: 'var(--color-snow)' }}>Sell {o.assetName}</span>
               <span className="text-sm font-semibold" style={{ color: 'var(--color-seafoam)', fontFamily: 'var(--font-data)' }}>
@@ -184,7 +188,7 @@ export function PurchaseModal() {
   const cash = player.finances.cashBalance
   const afford = cash >= pp.cost
   const isDream = pp.kind === 'dream'
-  const accent = isDream ? '#d9799f' : '#9bbb4c'
+  const accent = isDream ? '#FF2EA6' : '#2EF2A6'
 
   // SC sink: rivals who landed on your Dream inflated its price; pull strings to undo one.
   const dreamId = isDream ? game.boardSpaces.find((s) => s.id === pp.spaceId)?.dreamId : undefined

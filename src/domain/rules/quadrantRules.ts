@@ -44,9 +44,11 @@ export const QUADRANT_LABELS: Record<ESBIQuadrant, string> = {
   I: 'Investor',
 }
 
+// ESBI as a wealth progression: muted lavender (active income) → neon cyan →
+// gold (investor). Right side glows brighter — that's where the game is won.
 export const QUADRANT_COLORS: Record<ESBIQuadrant, string> = {
-  E: '#6E6E6E',
-  S: '#9A9A9A',
-  B: '#CFCFCF',
-  I: '#E6E6E6',
+  E: '#8A7FB0',
+  S: '#B8AEDC',
+  B: '#2DE2FF',
+  I: '#FFC93C',
 }

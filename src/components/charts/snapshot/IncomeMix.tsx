@@ -13,7 +13,7 @@ export function IncomeMix({ player }: Props) {
     { label: 'Passive', value: s.totalPassiveIncome, total: s.totalMonthlyIncome, color: 'var(--color-seafoam)' },
   ]
   return (
-    <ChartCard title="Income Mix">
+    <ChartCard title="Income Mix" accent="var(--color-seafoam)">
       <BarMeter bars={bars} />
     </ChartCard>
   )

@@ -9,23 +9,24 @@ import { valueColor } from '../../utils/colors'
 import { KbdHint } from '../ui/KbdHint'
 import { useShortcutBadge } from '../../hooks/useGameShortcuts'
 
+// Neon Exchange card-type spectrum — bright, mutually distinguishable accents.
 const TYPE_META: Record<string, { color: string; label: string }> = {
-  small_deal:          { color: '#5B8FF9', label: 'Small Deal' },
-  big_deal:            { color: '#C8963C', label: 'Big Deal' },
-  market:              { color: '#2DD4BF', label: 'The Market' },
-  doodad:              { color: '#F0A050', label: 'Lifestyle' },
-  event:               { color: '#8090A8', label: 'Event' },
-  income:              { color: '#2DD4BF', label: 'Income' },
-  expense_liability:   { color: '#F06070', label: 'Expense' },
-  asset_acquisition:   { color: '#5B8FF9', label: 'Asset' },
-  system_building:     { color: '#A87BF0', label: 'System' },
-  decision_temptation: { color: '#F0A050', label: 'Decision' },
-  obstacle_challenge:  { color: '#F06070', label: 'Obstacle' },
-  network:             { color: '#5BC8A0', label: 'Network' },
+  small_deal:          { color: '#2DE2FF', label: 'Small Deal' },
+  big_deal:            { color: '#FFC93C', label: 'Big Deal' },
+  market:              { color: '#1FE0C4', label: 'The Market' },
+  doodad:              { color: '#FF9E3D', label: 'Lifestyle' },
+  event:               { color: '#9A8FD6', label: 'Event' },
+  income:              { color: '#1FE0C4', label: 'Income' },
+  expense_liability:   { color: '#FF4D6D', label: 'Expense' },
+  asset_acquisition:   { color: '#2DE2FF', label: 'Asset' },
+  system_building:     { color: '#B06BFF', label: 'System' },
+  decision_temptation: { color: '#FF9E3D', label: 'Decision' },
+  obstacle_challenge:  { color: '#FF4D6D', label: 'Obstacle' },
+  network:             { color: '#2EF2A6', label: 'Network' },
 }
 
-const LIFESTYLE_NEED_COLOR = '#F06070'
-const LIFESTYLE_WANT_COLOR = '#F0A050'
+const LIFESTYLE_NEED_COLOR = '#FF4D6D'
+const LIFESTYLE_WANT_COLOR = '#FF9E3D'
 
 const DECLINABLE = new Set(['asset_acquisition', 'decision_temptation', 'small_deal', 'big_deal'])
 
@@ -262,7 +263,7 @@ export function CardModal({ card }: Props) {
                   onClick={handleBorrowAndBuy}
                   className="flex-1 py-2.5 text-sm font-semibold transition-opacity hover:opacity-90"
                   style={{
-                    background: '#5B8FF9',
+                    background: '#2DE2FF',
                     color: 'var(--color-ink)',
                     borderRadius: '3px',
                     border: 'none',

@@ -39,14 +39,15 @@ export function PlayerPanel() {
       className="w-52 flex flex-col p-3 gap-4 flex-shrink-0"
       style={{
         background: 'var(--color-paper)',
-        borderLeft: '1px solid var(--color-rim)',
+        borderLeft: '1px solid var(--color-iris)',
+        boxShadow: '-1px 0 14px rgba(176,107,255,0.22)',
       }}
     >
       <div className="pb-3" style={{ borderBottom: '1px solid var(--color-rim)' }}>
         <div className="flex items-center gap-2 mb-2">
           <div
-            className="w-2.5 h-2.5 rounded-full"
-            style={{ background: player.color, boxShadow: `0 0 6px ${player.color}80` }}
+            className="w-2.5 h-2.5 rounded-full anim-pulse"
+            style={{ background: player.color, color: player.color, boxShadow: `0 0 8px ${player.color}` }}
           />
           <span
             className="font-semibold text-sm"
@@ -73,8 +74,8 @@ export function PlayerPanel() {
           {game.lastDiceRoll.map((d, i) => (
             <div
               key={i}
-              className="w-10 h-10 flex items-center justify-center text-xl font-black shadow-md"
-              style={{ background: 'var(--color-snow)', color: 'var(--color-ink)', borderRadius: '3px' }}
+              className="arcade-clip-sm w-10 h-10 flex items-center justify-center text-xl font-black"
+              style={{ background: 'var(--color-snow)', color: 'var(--color-ink)', boxShadow: '0 0 14px rgba(242,236,255,0.55)' }}
             >
               {['⚀','⚁','⚂','⚃','⚄','⚅'][d - 1]}
             </div>
@@ -117,12 +118,13 @@ export function PlayerPanel() {
           </p>
           <StatRow label="Day income" value={formatCurrency(player.cashflowDayIncome)} color="var(--color-honey)" />
           <StatRow label="Win at" value={formatCurrency(player.cashflowDayGoal)} color="var(--color-gold)" />
-          <div className="h-1.5 overflow-hidden" style={{ background: 'var(--color-rim)', borderRadius: '2px' }}>
+          <div className="neon-bar h-2">
             <div
-              className="h-full transition-all duration-700"
+              className="neon-bar-fill"
               style={{
                 width: `${player.cashflowDayGoal > 0 ? Math.min(100, Math.round((player.cashflowDayIncome / player.cashflowDayGoal) * 100)) : 0}%`,
                 background: 'var(--color-gold)',
+                boxShadow: '0 0 10px var(--color-gold)',
               }}
             />
           </div>
@@ -133,8 +135,8 @@ export function PlayerPanel() {
         {canPromote && (
           <button
             onClick={moveToFastTrack}
-            className="w-full py-2 font-semibold text-xs tracking-[0.12em] uppercase transition-all active:scale-[0.98]"
-            style={{ background: 'var(--color-gold)', color: 'var(--color-ink)', borderRadius: '3px', border: 'none', cursor: 'pointer' }}
+            className="arcade-clip-sm w-full py-2 font-semibold text-xs tracking-[0.12em] uppercase transition-all hover:brightness-110 active:scale-[0.98]"
+            style={{ background: 'var(--color-gold)', color: 'var(--color-ink)', border: 'none', boxShadow: '0 0 16px rgba(255,201,60,0.45)', cursor: 'pointer' }}
           >
             Move to Fast Track →{fastTrackBadge && <KbdHint k={fastTrackBadge} />}
           </button>
@@ -145,12 +147,12 @@ export function PlayerPanel() {
           <button
             data-tutorial="primary-action"
             onClick={() => dispatch({ type: 'MOVE_COMPLETE' })}
-            className="w-full py-3 font-semibold text-xs tracking-[0.12em] uppercase transition-all active:scale-[0.98]"
+            className="arcade-clip-sm w-full py-3 font-semibold text-xs tracking-[0.12em] uppercase transition-all hover:brightness-110 active:scale-[0.98]"
             style={{
               background: 'var(--color-azure)',
               color: 'var(--color-ink)',
-              borderRadius: '3px',
               border: 'none',
+              boxShadow: '0 0 16px rgba(45,226,255,0.45)',
               cursor: 'pointer',
             }}
           >
@@ -167,8 +169,8 @@ export function PlayerPanel() {
                 <button
                   key={n}
                   onClick={() => rollDiceWith(n)}
-                  className="flex-1 py-3 font-bold text-base transition-all active:scale-[0.98]"
-                  style={{ background: 'var(--color-seafoam)', color: 'var(--color-ink)', borderRadius: '3px', border: 'none', cursor: 'pointer' }}
+                  className="arcade-clip-sm flex-1 py-3 font-bold text-base transition-all hover:brightness-110 active:scale-[0.98]"
+                  style={{ background: 'var(--color-seafoam)', color: 'var(--color-ink)', border: 'none', boxShadow: '0 0 16px rgba(46,242,166,0.45)', cursor: 'pointer' }}
                 >
                   {n}
                 </button>
@@ -181,13 +183,13 @@ export function PlayerPanel() {
             data-tutorial="primary-action"
             onClick={() => dispatch({ type: 'ROLL_DICE' })}
             disabled={!canRoll}
-            className="w-full py-3 font-semibold text-xs tracking-[0.12em] uppercase transition-all active:scale-[0.98]"
+            className="arcade-clip-sm w-full py-3 font-semibold text-xs tracking-[0.12em] uppercase transition-all hover:brightness-110 active:scale-[0.98]"
             style={{
               background: canRoll ? (mustSkip ? 'var(--color-flame)' : 'var(--color-seafoam)') : 'var(--color-rim)',
               color: canRoll ? 'var(--color-ink)' : 'var(--color-fog)',
               cursor: canRoll ? 'pointer' : 'not-allowed',
-              borderRadius: '3px',
               border: 'none',
+              boxShadow: canRoll ? (mustSkip ? '0 0 16px rgba(255,77,109,0.45)' : '0 0 16px rgba(46,242,166,0.45)') : 'none',
             }}
           >
             {mustSkip ? `Lose Turn (${player.skipTurns})` : onFastTrack || player.extraDiceTurns > 0 ? 'Roll 2 Dice' : 'Roll Die'}
@@ -199,14 +201,15 @@ export function PlayerPanel() {
           data-tutorial="end-turn"
           onClick={() => dispatch({ type: 'END_TURN' })}
           disabled={!canEndTurn}
-          className="w-full py-2 text-xs font-medium tracking-wider uppercase transition-all"
+          className="arcade-clip-sm w-full py-2 text-xs font-medium tracking-wider uppercase transition-all"
           style={{
             border: `1px solid ${canEndTurn ? 'var(--color-wire)' : 'var(--color-rim)'}`,
             color: canEndTurn ? 'var(--color-mist)' : 'var(--color-fog)',
             cursor: canEndTurn ? 'pointer' : 'not-allowed',
-            borderRadius: '3px',
             background: 'transparent',
           }}
+          onMouseEnter={(e) => { if (!canEndTurn) return; e.currentTarget.style.background = 'rgba(176,107,255,0.10)'; e.currentTarget.style.borderColor = 'var(--color-iris)'; e.currentTarget.style.color = 'var(--color-snow)'; e.currentTarget.style.boxShadow = '0 0 16px rgba(176,107,255,0.35)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = canEndTurn ? 'var(--color-wire)' : 'var(--color-rim)'; e.currentTarget.style.color = canEndTurn ? 'var(--color-mist)' : 'var(--color-fog)'; e.currentTarget.style.boxShadow = 'none' }}
         >
           End Turn{canEndTurn && primaryBadge && <KbdHint k={primaryBadge} />}
         </button>

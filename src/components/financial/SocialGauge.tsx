@@ -24,15 +24,15 @@ export function SocialGauge({ player }: Props) {
         <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--color-fog)' }}>
           Network
         </span>
-        <span className="text-xs font-bold" style={{ color, fontFamily: 'var(--font-data)' }}>
+        <span className="text-xs font-bold" style={{ color, fontFamily: 'var(--font-data)', textShadow: `0 0 8px ${color}` }}>
           {socialCapital}/{socialCapitalCap} SC
         </span>
       </div>
 
-      <div className="h-1.5 overflow-hidden" style={{ background: 'var(--color-rim)', borderRadius: '2px' }}>
+      <div className="neon-bar h-2">
         <div
-          className="h-full transition-all duration-700"
-          style={{ width: `${pct}%`, background: color, borderRadius: '2px' }}
+          className="neon-bar-fill"
+          style={{ width: `${pct}%`, background: color, boxShadow: `0 0 10px ${color}` }}
         />
       </div>
 

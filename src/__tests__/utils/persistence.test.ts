@@ -23,7 +23,7 @@ describe('saveGame / loadGame', () => {
   })
 
   it('backfills missing history and turnLog with empty defaults', () => {
-    const game = makeGame() as Record<string, unknown>
+    const game = makeGame() as unknown as Record<string, unknown>
     delete game.history
     delete game.turnLog
     localStorage.setItem(KEY, JSON.stringify(game))

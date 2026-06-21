@@ -26,16 +26,21 @@ export function PrincipleToast() {
   )
 }
 
+/** Toasts linger for 10s, then auto-dismiss (or close immediately via the ✕). */
+const TOAST_TTL_MS = 10_000
+
 function ToastItem({ id, onDone, onOpen }: { id: string; onDone: () => void; onOpen: () => void }) {
   const p = principleById(id)
   useEffect(() => {
-    const t = setTimeout(onDone, 4600)
+    const t = setTimeout(onDone, TOAST_TTL_MS)
     return () => clearTimeout(t)
   }, [onDone])
   if (!p) return null
   return (
-    <motion.button
+    <motion.div
       onClick={onOpen}
+      role="button"
+      tabIndex={0}
       initial={{ opacity: 0, x: -36, scale: 0.96 }}
       animate={{ opacity: 1, x: 0, scale: 1 }}
       exit={{ opacity: 0, x: -36, scale: 0.96 }}
@@ -60,6 +65,21 @@ function ToastItem({ id, onDone, onOpen }: { id: string; onDone: () => void; onO
         >
           {SURFACE_LABELS[p.surface]}
         </span>
+        <button
+          onClick={(e) => { e.stopPropagation(); onDone() }}
+          aria-label="Dismiss"
+          title="Dismiss"
+          className="flex items-center justify-center transition-colors"
+          style={{
+            width: '16px', height: '16px', flexShrink: 0,
+            background: 'transparent', border: 'none', cursor: 'pointer',
+            color: 'var(--color-fog)', fontSize: '13px', lineHeight: 1,
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-snow)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-fog)' }}
+        >
+          ✕
+        </button>
       </div>
       <p className="text-[13px] font-semibold leading-tight" style={{ color: 'var(--color-snow)', fontFamily: 'var(--font-ui)' }}>
         {p.name}
@@ -67,6 +87,6 @@ function ToastItem({ id, onDone, onOpen }: { id: string; onDone: () => void; onO
       <p className="text-[10.5px] leading-snug mt-0.5" style={{ color: 'var(--color-mist)' }}>
         {p.oneLiner}
       </p>
-    </motion.button>
+    </motion.div>
   )
 }

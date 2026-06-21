@@ -75,7 +75,7 @@ export function CodexScreen({ onBack, backLabel = 'Back to Menu' }: Props) {
   }, [filtered])
 
   return (
-    <div className="min-h-screen overflow-y-auto" style={{ background: 'var(--color-ink)' }}>
+    <div className="h-screen overflow-y-auto" style={{ background: 'var(--color-ink)' }}>
       <div className="max-w-5xl mx-auto px-6 py-10">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">

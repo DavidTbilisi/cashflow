@@ -36,13 +36,25 @@ export function PassiveIncomeGauge({ player }: Props) {
         </span>
       </div>
 
-      <div className="neon-bar h-2">
+      <div className="neon-bar h-2" style={{ position: 'relative' }}>
         <div
           className="neon-bar-fill"
           style={{
             width: `${pct}%`,
             background: gaugeColor(pct),
             boxShadow: `0 0 10px ${gaugeColor(pct)}`,
+          }}
+        />
+        {/* Zone tick at 50% — where the gauge turns from "struggling" red to "progress" gold. */}
+        <span
+          aria-hidden
+          style={{
+            position: 'absolute',
+            top: '-1px',
+            bottom: '-1px',
+            left: '50%',
+            width: '1px',
+            background: 'rgba(242,236,255,0.28)',
           }}
         />
       </div>
@@ -52,7 +64,13 @@ export function PassiveIncomeGauge({ player }: Props) {
         style={{ color: 'var(--color-fog)', fontFamily: 'var(--font-data)' }}
       >
         <span>{formatCurrency(summary.totalPassiveIncome)}/mo passive</span>
-        <span>{formatCurrency(summary.totalMonthlyExpenses)}/mo needed</span>
+        {free ? (
+          <span style={{ color: 'var(--color-seafoam)' }}>{formatCurrency(summary.totalMonthlyExpenses)}/mo needed ✓</span>
+        ) : (
+          <span title="Extra monthly passive income needed to escape the Rat Race">
+            need {formatCurrency(Math.max(summary.totalMonthlyExpenses - summary.totalPassiveIncome, 0))} more/mo
+          </span>
+        )}
       </div>
 
       {free && (

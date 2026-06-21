@@ -4,13 +4,14 @@ import { LobbyScreen } from './screens/LobbyScreen'
 import { GameScreen } from './screens/GameScreen'
 import { ResultsScreen } from './screens/ResultsScreen'
 import { HowToPlayScreen } from './screens/HowToPlayScreen'
+import { CodexScreen } from './screens/CodexScreen'
 import { useGameStore } from './store/gameStore'
 import { useTutorialStore } from './store/tutorialStore'
 import { STARTING_PROFILES } from './domain/data/startingProfiles'
 import { DREAMS } from './domain/data/fastTrack'
 import { loadGame } from './utils/persistence'
 
-type Screen = 'menu' | 'lobby' | 'game' | 'results' | 'howto'
+type Screen = 'menu' | 'lobby' | 'game' | 'results' | 'howto' | 'codex'
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('menu')
@@ -51,11 +52,13 @@ export default function App() {
           onContinue={handleContinue}
           onTutorial={handleStartTutorial}
           onHowToPlay={() => setScreen('howto')}
+          onCodex={() => setScreen('codex')}
         />
       )}
       {screen === 'howto' && (
         <HowToPlayScreen onBack={() => setScreen('menu')} onStartTutorial={handleStartTutorial} />
       )}
+      {screen === 'codex' && <CodexScreen onBack={() => setScreen('menu')} />}
       {screen === 'lobby' && (
         <LobbyScreen onStart={() => setScreen('game')} />
       )}

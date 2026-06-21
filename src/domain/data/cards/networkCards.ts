@@ -16,6 +16,7 @@ export const networkCards: Card[] = [
     flavorText: 'A warm intro opens a door a cold email never will.',
     effects: [{ type: 'gain_social', amount: 4, label: "Mentor's Introduction" }],
     lesson: 'Relationships compound. A trusted introduction is a real asset on your balance sheet.',
+    principleId: 'social-capital',
   },
   {
     id: 'net_community_volunteer',
@@ -41,7 +42,8 @@ export const networkCards: Card[] = [
         onShort: [],
       },
     ],
-    lesson: 'Social capital only compounds if you spend it on others first.',
+    lesson: 'Social capital only compounds if you spend it on others first. Wealth games are positive-sum — give first and the network repays givers.',
+    principleId: 'status-vs-wealth',
   },
   {
     id: 'net_off_market_deal',

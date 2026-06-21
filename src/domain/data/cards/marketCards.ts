@@ -22,6 +22,7 @@ export const marketCards: Card[] = [
     marketEvent: { assetName: 'Rental Condo', salePrice: 55000 },
     effects: [],
     lesson: 'You bought below value; selling above it locks in the spread.',
+    principleId: 'margin-of-safety',
   },
   {
     id: 'mkt_apartment_buyer',
@@ -57,7 +58,8 @@ export const marketCards: Card[] = [
     description: 'OK4U Drug Co. spikes to the top of its range. Your shares are now worth $7,500. Sell?',
     marketEvent: { assetName: 'OK4U', salePrice: 7500 },
     effects: [],
-    lesson: 'Sell into strength. A stock with no dividend only pays when you take the gain.',
+    lesson: 'Sell into strength. A stock with no dividend only pays when you take the gain. Buy from Mr. Market\'s pessimism, sell into his optimism.',
+    principleId: 'mr-market',
   },
   {
     id: 'mkt_land_boom',
@@ -75,5 +77,15 @@ export const marketCards: Card[] = [
     description: 'The central bank hikes rates. Variable costs tick up $100/mo this round.',
     effects: [{ type: 'add_expense', monthlyAmount: 100, label: 'Higher interest', isFixed: false }],
     lesson: 'Rising rates raise the cost of debt — another reason to keep leverage sensible.',
+    principleId: 'leverage-guardrails',
+  },
+  {
+    id: 'mkt_fund_fees',
+    type: 'market',
+    title: 'The Fees Revealed',
+    description: 'A statement finally shows the 1%/yr fee on a managed fund you hold. It quietly skims $60/mo from your returns.',
+    effects: [{ type: 'add_expense', monthlyAmount: 60, label: 'Investment fees', isFixed: false }],
+    lesson: 'Costs compound against you exactly as returns compound for you. In investing, you get what you DON\'T pay for — favour low-cost funds.',
+    principleId: 'cost-compounding',
   },
 ]

@@ -8,6 +8,22 @@ study notes (Rich Dad Poor Dad, the CASHFLOW Quadrant, the passive-income ladder
 
 > Independent, non-commercial learning project. See [License & attribution](#license--attribution).
 
+The full body of ideas behind the game — 50+ principles drawn from *Rich Dad Poor Dad*,
+*The Richest Man in Babylon*, *The Psychology of Money*, *The Almanack of Naval*,
+*Profit First*, the *Fastlane / Unscripted* books, *The Intelligent Investor*, Bogle, and
+*Zero to One* — lives in the in-app **Wealth Codex** (`src/domain/data/principles.ts` +
+`src/screens/CodexScreen.tsx`). Each entry maps a principle to exactly where it shows up
+in the game (mechanic, card, gauge, or win/lose condition), and cards link back to it.
+
+Crucially, the principles are **played, not just listed**: each one is *discovered* when you
+actually meet it in a game — its card surfaces, or your finances demonstrate it (bank a
+buffer → *Room for Error*, advance a quadrant → *ESBI*, borrow against an asset → *Good
+Debt*). A toast announces each discovery, the top bar shows live `N/54` progress, and the
+Codex fills in (locked → unlocked) across games via `localStorage`. Coverage that *every*
+principle is reachable in play is enforced by a test (`principleCoverage.test.ts`):
+`derivePlayerPrinciples` (`src/domain/services/principleDiscovery.ts`) handles the
+state-derived ones; card `principleId`s handle the rest.
+
 ## Tech stack
 
 | Concern        | Choice                                  |

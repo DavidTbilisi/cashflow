@@ -5,9 +5,10 @@ interface Props {
   onContinue: () => void
   onTutorial: () => void
   onHowToPlay: () => void
+  onCodex: () => void
 }
 
-export function MainMenuScreen({ onNewGame, onContinue, onTutorial, onHowToPlay }: Props) {
+export function MainMenuScreen({ onNewGame, onContinue, onTutorial, onHowToPlay, onCodex }: Props) {
   const hasSave = !!loadGame()
 
   return (
@@ -106,6 +107,27 @@ export function MainMenuScreen({ onNewGame, onContinue, onTutorial, onHowToPlay 
             }}
           >
             How to Play
+          </button>
+          <button
+            onClick={onCodex}
+            className="w-full py-3 font-medium text-xs tracking-[0.1em] transition-all"
+            style={{
+              border: '1px solid var(--color-rim)',
+              color: 'var(--color-mist)',
+              fontFamily: 'var(--font-ui)',
+              borderRadius: '3px',
+              background: 'transparent',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = 'var(--color-wire)'
+              e.currentTarget.style.color = 'var(--color-snow)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = 'var(--color-rim)'
+              e.currentTarget.style.color = 'var(--color-mist)'
+            }}
+          >
+            Wealth Codex
           </button>
           {hasSave && (
             <button

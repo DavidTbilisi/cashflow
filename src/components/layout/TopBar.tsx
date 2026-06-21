@@ -1,4 +1,7 @@
 import { useGameStore } from '../../store/gameStore'
+import { useUIStore } from '../../store/uiStore'
+import { useDiscoveryStore, discoveredCount } from '../../store/discoveryStore'
+import { PRINCIPLES } from '../../domain/data/principles'
 import { computeSummary } from '../../domain/services/financialCalc'
 import { gameTime } from '../../domain/rules/profitFirst'
 import { ESBIIndicator } from '../progress/ESBIIndicator'
@@ -8,6 +11,9 @@ import { InfoLabel, TERM_INFO } from '../ui/conceptInfo'
 
 export function TopBar() {
   const game = useGameStore((s) => s.game)
+  const setCodex = useUIStore((s) => s.setCodex)
+  const discovered = useDiscoveryStore((s) => s.discovered)
+  const found = discoveredCount(discovered)
   if (!game) return null
 
   const current = game.players[game.currentPlayerIndex]
@@ -65,6 +71,26 @@ export function TopBar() {
       </div>
 
       <div className="ml-auto flex items-center gap-4">
+        <button
+          onClick={() => setCodex(true)}
+          className="arcade-clip-sm flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider transition-all"
+          title="Open the Wealth Codex — every principle behind the game"
+          style={{
+            background: 'transparent',
+            border: '1px solid var(--color-rim)',
+            color: 'var(--color-gold)',
+            fontFamily: 'var(--font-ui)',
+            cursor: 'pointer',
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--color-gold)'; e.currentTarget.style.background = 'rgba(255,201,60,0.08)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--color-rim)'; e.currentTarget.style.background = 'transparent' }}
+        >
+          <span aria-hidden>📖</span> Codex
+          <span style={{ color: 'var(--color-fog)', fontFamily: 'var(--font-data)', fontWeight: 600 }}>
+            {found}/{PRINCIPLES.length}
+          </span>
+        </button>
+
         <span className="text-[11px]" style={{ color: 'var(--color-mist)' }}>
           <InfoLabel info={TERM_INFO.netWorth}>Net Worth</InfoLabel>{' '}
           <span

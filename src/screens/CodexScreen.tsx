@@ -41,8 +41,10 @@ export function CodexScreen({ onBack, backLabel = 'Back to Menu' }: Props) {
   const [expanded, setExpanded] = useState<string | null>(null)
   const [studyMode, setStudyMode] = useState(false)
   const [discoveredOnly, setDiscoveredOnly] = useState(false)
+  const [confirmReset, setConfirmReset] = useState(false)
 
   const discovered = useDiscoveryStore((s) => s.discovered)
+  const resetProgress = useDiscoveryStore((s) => s.reset)
   const found = discoveredCount(discovered)
   const total = PRINCIPLES.length
   const pct = Math.round((found / total) * 100)
@@ -129,6 +131,42 @@ export function CodexScreen({ onBack, backLabel = 'Back to Menu' }: Props) {
             {found === total && (
               <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--color-seafoam)' }}>
                 ◆ Codex complete — every principle played ◆
+              </span>
+            )}
+            {found > 0 && (
+              <span className="ml-auto flex items-center gap-2">
+                {confirmReset ? (
+                  <>
+                    <span className="text-[10px] uppercase tracking-wider" style={{ color: 'var(--color-fog)' }}>
+                      Reset {found} discovered?
+                    </span>
+                    <button
+                      onClick={() => { resetProgress(); setConfirmReset(false) }}
+                      className="text-[10px] font-bold uppercase tracking-wider"
+                      style={{ color: 'var(--color-flame)', background: 'transparent', border: 'none', cursor: 'pointer' }}
+                    >
+                      Yes, reset
+                    </button>
+                    <button
+                      onClick={() => setConfirmReset(false)}
+                      className="text-[10px] uppercase tracking-wider"
+                      style={{ color: 'var(--color-mist)', background: 'transparent', border: 'none', cursor: 'pointer' }}
+                    >
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => setConfirmReset(true)}
+                    title="Clear your lifetime discovery progress"
+                    className="text-[10px] uppercase tracking-wider transition-colors"
+                    style={{ color: 'var(--color-fog)', background: 'transparent', border: 'none', cursor: 'pointer' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-flame)' }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-fog)' }}
+                  >
+                    ↺ Reset progress
+                  </button>
+                )}
               </span>
             )}
           </div>

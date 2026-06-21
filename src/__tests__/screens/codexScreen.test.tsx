@@ -1,8 +1,9 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { act, type ReactNode } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { CodexScreen } from '../../screens/CodexScreen'
 import { PRINCIPLES } from '../../domain/data/principles'
+import { useDiscoveryStore, discoveredCount } from '../../store/discoveryStore'
 
 // React 19's act() needs this flag set in a non-RTL environment.
 ;(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true
@@ -19,10 +20,19 @@ function mount(ui: ReactNode) {
   })
 }
 
+beforeEach(() => {
+  localStorage.clear()
+  useDiscoveryStore.getState().reset()
+})
+
 afterEach(() => {
   act(() => root.unmount())
   container.remove()
 })
+
+function findButton(label: RegExp): HTMLButtonElement | undefined {
+  return [...container.querySelectorAll('button')].find((b) => label.test(b.textContent ?? ''))
+}
 
 describe('CodexScreen — all principles visible and the view scrolls', () => {
   it('mounts exactly one bounded scroll container (regression: was min-h-screen, which could not scroll)', () => {
@@ -63,5 +73,29 @@ describe('CodexScreen — all principles visible and the view scrolls', () => {
     expect(scroller!.classList.contains('h-screen')).toBe(true)
     // Last principle still rendered within the overlay.
     expect(container.textContent ?? '').toContain(PRINCIPLES[PRINCIPLES.length - 1].name)
+  })
+
+  it('reset-progress button clears discovered progress after confirming', () => {
+    useDiscoveryStore.getState().discover(['six-anchors', 'mr-market'])
+    expect(discoveredCount(useDiscoveryStore.getState().discovered)).toBe(2)
+
+    mount(<CodexScreen onBack={() => {}} />)
+
+    // First click asks for confirmation rather than wiping immediately.
+    const resetBtn = findButton(/Reset progress/i)
+    expect(resetBtn, 'reset button should appear once something is discovered').toBeTruthy()
+    act(() => resetBtn!.click())
+    expect(discoveredCount(useDiscoveryStore.getState().discovered)).toBe(2) // not yet
+
+    // Confirming clears lifetime progress.
+    const yesBtn = findButton(/Yes, reset/i)
+    expect(yesBtn).toBeTruthy()
+    act(() => yesBtn!.click())
+    expect(discoveredCount(useDiscoveryStore.getState().discovered)).toBe(0)
+  })
+
+  it('hides the reset button when nothing has been discovered', () => {
+    mount(<CodexScreen onBack={() => {}} />)
+    expect(findButton(/Reset progress/i)).toBeUndefined()
   })
 })

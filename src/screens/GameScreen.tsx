@@ -15,6 +15,9 @@ import { useShortcutEngine, ShortcutsContext } from '../hooks/useGameShortcuts'
 import { ShortcutHelp } from '../components/overlays/ShortcutHelp'
 import { useTutorialDriver } from '../hooks/useTutorialDriver'
 import { TutorialCoach } from '../components/tutorial/TutorialCoach'
+import { CodexScreen } from './CodexScreen'
+import { usePrincipleDiscovery } from '../hooks/usePrincipleDiscovery'
+import { PrincipleToast } from '../components/overlays/PrincipleToast'
 
 export function GameScreen() {
   const phase = useGameStore((s) => s.game?.currentTurnPhase)
@@ -23,6 +26,8 @@ export function GameScreen() {
   const game = useGameStore((s) => s.game)
   const modalOpen = useUIStore((s) => s.modalOpen)
   const toggleHelp = useUIStore((s) => s.toggleHelp)
+  const codexOpen = useUIStore((s) => s.codexOpen)
+  const setCodex = useUIStore((s) => s.setCodex)
 
   const necstOpen = modalOpen === 'necst'
   const showDeal = phase === 'choose_deal'
@@ -33,6 +38,7 @@ export function GameScreen() {
 
   useGameSounds()
   useTutorialDriver()
+  usePrincipleDiscovery()
   const shortcuts = useShortcutEngine()
 
   const player = game ? game.players[game.currentPlayerIndex] : null
@@ -75,6 +81,13 @@ export function GameScreen() {
         {showCard && activeCard && <CardModal card={activeCard} />}
         {necstOpen && <NECSTModal />}
 
+        {codexOpen && (
+          <div className="fixed inset-0 z-50" style={{ background: 'var(--color-ink)' }}>
+            <CodexScreen onBack={() => setCodex(false)} backLabel="Back to Game" />
+          </div>
+        )}
+
+        <PrincipleToast />
         <ShortcutHelp />
         <TutorialCoach />
         <button

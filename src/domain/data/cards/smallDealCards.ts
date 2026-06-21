@@ -28,6 +28,7 @@ export const smallDealCards: Card[] = [
     description: 'Motivated seller. Price $50,000, your down payment $5,000. Nets +$140/mo after the mortgage.',
     effects: [{ type: 'acquire_asset', asset: { name: '3Br/2Ba House', assetClass: 'real_estate', purchasePrice: 50000, currentValue: 50000, monthlyPassiveIncome: 140, monthlyExpense: 0, leverageUsed: true, liabilityAmount: 45000, cardId: 'sd_house_3_2' } }],
     lesson: 'A small down payment controls a whole property — leverage working for you.',
+    principleId: 'good-vs-bad-debt',
   },
   {
     id: 'sd_condo',
@@ -36,6 +37,7 @@ export const smallDealCards: Card[] = [
     description: 'Foreclosed condo. Price $40,000, down payment $4,000, mortgage $36,000. Nets +$120/mo.',
     effects: [{ type: 'acquire_asset', asset: { name: 'Rental Condo', assetClass: 'real_estate', purchasePrice: 40000, currentValue: 40000, monthlyPassiveIncome: 120, monthlyExpense: 0, leverageUsed: true, liabilityAmount: 36000, cardId: 'sd_condo' } }],
     lesson: 'Foreclosures can be bought below value — but always run the cash-flow numbers first.',
+    principleId: 'margin-of-safety',
   },
   {
     id: 'sd_partnership',
@@ -52,6 +54,7 @@ export const smallDealCards: Card[] = [
     description: 'Park $5,000 in a 12-month CD. Pays +$25/mo in interest.',
     effects: [{ type: 'acquire_asset', asset: { name: 'CD', assetClass: 'bonds', purchasePrice: 5000, currentValue: 5000, monthlyPassiveIncome: 25, monthlyExpense: 0, leverageUsed: false, liabilityAmount: 0, cardId: 'sd_cd' } }],
     lesson: 'Safe, liquid, low return — fine for cash you can\'t risk, weak for building wealth.',
+    principleId: 'emergency-buffer',
   },
   {
     id: 'sd_land',
@@ -70,5 +73,16 @@ export const smallDealCards: Card[] = [
     flavorText: 'Collectibles pay nothing monthly — you profit only on resale.',
     effects: [{ type: 'acquire_asset', asset: { name: 'Rare Coins', assetClass: 'commodity', purchasePrice: 1500, currentValue: 1500, monthlyPassiveIncome: 0, monthlyExpense: 0, leverageUsed: false, liabilityAmount: 0, cardId: 'sd_coins' } }],
     lesson: 'Collectibles are speculation: no cash flow, and a market only when someone wants them.',
+    principleId: 'circle-of-competence',
+  },
+  {
+    id: 'sd_index',
+    type: 'small_deal',
+    title: 'Total-Market Index Fund',
+    description: 'Own the whole market in one low-cost fund. Invest $4,000; it pays a steady +$30/mo and quietly compounds.',
+    flavorText: 'Don\'t look for the needle — buy the haystack.',
+    effects: [{ type: 'acquire_asset', asset: { name: 'Index Fund', assetClass: 'stocks', purchasePrice: 4000, currentValue: 4000, monthlyPassiveIncome: 30, monthlyExpense: 0, leverageUsed: false, liabilityAmount: 0, cardId: 'sd_index' } }],
+    lesson: 'Most active investors lose to the index after costs. Low-cost, diversified and boring beats clever and expensive.',
+    principleId: 'index-investing',
   },
 ]

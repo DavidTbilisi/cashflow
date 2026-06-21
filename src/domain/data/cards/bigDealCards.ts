@@ -9,7 +9,8 @@ export const bigDealCards: Card[] = [
     description: '12-unit building from out-of-state heirs. Cost $350,000, down $50,000, mortgage $300,000. Nets +$2,400/mo.',
     flavorText: '58% cash-on-cash return. Use it yourself or sell the option to another player.',
     effects: [{ type: 'acquire_asset', asset: { name: '12-Unit Apartments', assetClass: 'real_estate', purchasePrice: 350000, currentValue: 350000, monthlyPassiveIncome: 2400, monthlyExpense: 0, leverageUsed: true, liabilityAmount: 300000, cardId: 'bd_apartment_12' } }],
-    lesson: 'Big real estate uses big leverage — a $50k down payment controls a $350k asset.',
+    lesson: 'Big real estate uses big leverage — a $50k down payment controls a $350k asset. Capital is one of the four leverages that multiply a single good decision.',
+    principleId: 'leverage-naval',
   },
   {
     id: 'bd_8plex',

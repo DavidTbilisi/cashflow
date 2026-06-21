@@ -68,6 +68,7 @@ export const doodadCards: Card[] = [
     description: 'Your coffee and lunch-out habits ran three times over budget this month. Pay $450 or pass.',
     effects: [{ type: 'cash_loss', amount: 450 }],
     lesson: 'Cafe is a Wants line — small, recurring, and easy to rationalise. Aggregate it monthly to see the real number.',
+    principleId: 'budget-allocation',
   },
   {
     id: 'ls_wardrobe',
@@ -103,7 +104,8 @@ export const doodadCards: Card[] = [
     title: 'Vacation Impulse',
     description: 'A trip you booked before you checked your Savings balance. Pay $2,000 or pass.',
     effects: [{ type: 'cash_loss', amount: 2000 }],
-    lesson: 'Vacation is a Savings destination — 400 GEL/mo into the goal stack. Booking before saving inverts the order.',
+    lesson: 'Vacation is a Savings destination — 400 GEL/mo into the goal stack. Booking before saving inverts the order. You can only truly afford what you don\'t have to think about affording.',
+    principleId: 'affordability-test',
   },
   {
     id: 'ls_gym',

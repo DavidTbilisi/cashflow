@@ -23,6 +23,7 @@ export const assetCards: Card[] = [
       },
     ],
     lesson: 'Real estate leverage turns $24k of capital into a $500/month passive stream.',
+    principleId: 'good-vs-bad-debt',
   },
   {
     id: 'ast_02',
@@ -46,6 +47,7 @@ export const assetCards: Card[] = [
       },
     ],
     lesson: 'Index funds: low cost, diversified, compounding. Boring is powerful.',
+    principleId: 'index-investing',
   },
   {
     id: 'ast_03',
@@ -69,6 +71,7 @@ export const assetCards: Card[] = [
       },
     ],
     lesson: 'IP assets have near-zero marginal cost to serve one more customer.',
+    principleId: 'permissionless-leverage',
   },
   {
     id: 'ast_04',
@@ -94,6 +97,7 @@ export const assetCards: Card[] = [
       },
     ],
     lesson: 'Only buy a business that passes the NECST test — especially the Time Commandment.',
+    principleId: 'necst-test',
   },
   {
     id: 'ast_05',
@@ -117,6 +121,7 @@ export const assetCards: Card[] = [
       },
     ],
     lesson: 'Dividend portfolios provide cash flow AND potential appreciation.',
+    principleId: 'diversification',
   },
   {
     id: 'ast_06',

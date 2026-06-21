@@ -307,6 +307,8 @@ export interface Card {
   productocracy?: boolean
   effects: CardEffect[]
   lesson?: string
+  /** Links the card to a Wealth Codex principle (see domain/data/principles.ts). */
+  principleId?: string
   /** Lifestyle expense sub-category: 'need' = mandatory (no decline); 'want' = discretionary (can be passed). */
   lifestyleCategory?: 'need' | 'want'
 }

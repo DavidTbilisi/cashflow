@@ -8,6 +8,7 @@ import { formatCurrency } from '../../utils/currency'
 import { valueColor } from '../../utils/colors'
 import { KbdHint } from '../ui/KbdHint'
 import { useShortcutBadge } from '../../hooks/useGameShortcuts'
+import { principleById } from '../../domain/data/principles'
 
 // Neon Exchange card-type spectrum — bright, mutually distinguishable accents.
 const TYPE_META: Record<string, { color: string; label: string }> = {
@@ -41,6 +42,8 @@ export function CardModal({ card }: Props) {
   const finances = player?.finances ?? null
   const cash = finances?.cashBalance ?? 0
   const openModal = useUIStore((s) => s.openModal)
+  const setCodex = useUIStore((s) => s.setCodex)
+  const principle = card.principleId ? principleById(card.principleId) : undefined
   const primaryBadge = useShortcutBadge('primary')
   const dismissBadge = useShortcutBadge('dismiss')
   const negotiateBadge = useShortcutBadge('negotiate')
@@ -161,6 +164,15 @@ export function CardModal({ card }: Props) {
                 <p className="text-xs leading-relaxed" style={{ color: 'var(--color-honey)' }}>
                   {card.lesson}
                 </p>
+                {principle && (
+                  <button
+                    onClick={() => setCodex(true)}
+                    className="mt-2 text-[10px] font-semibold uppercase tracking-wider transition-opacity hover:opacity-80"
+                    style={{ color: 'var(--color-gold)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}
+                  >
+                    📖 Codex: {principle.name} →
+                  </button>
+                )}
               </div>
             )}
 

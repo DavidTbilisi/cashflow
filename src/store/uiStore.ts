@@ -11,6 +11,7 @@ interface UIState {
   modalOpen: 'card' | 'necst' | 'leverage' | 'roadmap' | 'results' | null
   sidebarTab: 'balance' | 'cashflow' | 'assets'
   helpOpen: boolean
+  codexOpen: boolean
   enqueueAnim: (event: AnimEvent) => void
   dequeueAnim: () => AnimEvent | undefined
   openModal: (m: UIState['modalOpen']) => void
@@ -18,6 +19,7 @@ interface UIState {
   setSidebarTab: (tab: UIState['sidebarTab']) => void
   toggleHelp: () => void
   setHelp: (open: boolean) => void
+  setCodex: (open: boolean) => void
 }
 
 export const useUIStore = create<UIState>((set, get) => ({
@@ -25,6 +27,7 @@ export const useUIStore = create<UIState>((set, get) => ({
   modalOpen: null,
   sidebarTab: 'balance',
   helpOpen: false,
+  codexOpen: false,
   enqueueAnim: (event) => set((s) => ({ animQueue: [...s.animQueue, event] })),
   dequeueAnim: () => {
     const [head, ...rest] = get().animQueue
@@ -36,4 +39,5 @@ export const useUIStore = create<UIState>((set, get) => ({
   setSidebarTab: (tab) => set({ sidebarTab: tab }),
   toggleHelp: () => set((s) => ({ helpOpen: !s.helpOpen })),
   setHelp: (open) => set({ helpOpen: open }),
+  setCodex: (open) => set({ codexOpen: open }),
 }))
